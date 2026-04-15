@@ -58,6 +58,23 @@ impl<'ast> Format<PyFormatContext<'ast>> for ParenthesizeIfExpands<'_, 'ast> {
     }
 }
 
+/// Indents the content by two levels if the enclosing group expands and keeps the closing token on
+/// its own line.
+pub(crate) fn double_soft_block_indent<'a, Context: 'a>(
+    content: &'a impl Format<Context>,
+) -> impl Format<Context> + 'a {
+    format_with(move |f| {
+        write!(
+            f,
+            [indent(&indent(&format_args![
+                soft_line_break(),
+                content,
+                dedent(&dedent(&soft_line_break())),
+            ]))]
+        )
+    })
+}
+
 /// Provides Python specific extensions to [`Formatter`].
 pub(crate) trait PyFormatterExtensions<'ast, 'buf> {
     /// A builder that separates each element by a `,` and a [`soft_line_break_or_space`].

@@ -1,9 +1,10 @@
 use ruff_formatter::{FormatError, write};
 use ruff_python_ast::AnyNodeRef;
-use ruff_python_ast::{Expr, ExprSlice, ExprUnaryOp, UnaryOp};
+use ruff_python_ast::{Expr, ExprBinOp, ExprSlice, ExprUnaryOp, Operator, UnaryOp};
 use ruff_python_trivia::{SimpleToken, SimpleTokenKind, SimpleTokenizer};
 use ruff_text_size::{Ranged, TextRange};
 
+use crate::SliceSpacing;
 use crate::comments::{SourceComment, dangling_comments};
 use crate::expression::parentheses::{NeedsParentheses, OptionalParentheses};
 use crate::prelude::*;
@@ -61,9 +62,16 @@ impl FormatNodeRule<ExprSlice> for FormatExprSlice {
 
         // Handle spacing around the colon(s)
         // https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#slices
-        let lower_simple = lower.as_ref().is_none_or(|expr| is_simple_expr(expr));
-        let upper_simple = upper.as_ref().is_none_or(|expr| is_simple_expr(expr));
-        let step_simple = step.as_ref().is_none_or(|expr| is_simple_expr(expr));
+        let slice_spacing = f.options().slice_spacing();
+        let lower_simple = lower
+            .as_ref()
+            .is_none_or(|expr| is_simple_expr(expr, slice_spacing));
+        let upper_simple = upper
+            .as_ref()
+            .is_none_or(|expr| is_simple_expr(expr, slice_spacing));
+        let step_simple = step
+            .as_ref()
+            .is_none_or(|expr| is_simple_expr(expr, slice_spacing));
         let all_simple = lower_simple && upper_simple && step_simple;
 
         // lower
@@ -191,7 +199,7 @@ pub(crate) fn find_colons(
 
 /// Determines whether this expression needs a space around the colon
 /// <https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#slices>
-fn is_simple_expr(expr: &Expr) -> bool {
+fn is_simple_expr(expr: &Expr, slice_spacing: SliceSpacing) -> bool {
     // Unary op expressions except `not` can be simple.
     if let Some(ExprUnaryOp {
         op: UnaryOp::UAdd | UnaryOp::USub | UnaryOp::Invert,
@@ -199,9 +207,59 @@ fn is_simple_expr(expr: &Expr) -> bool {
         ..
     }) = expr.as_unary_op_expr()
     {
-        is_simple_expr(operand)
+        is_simple_expr(operand, slice_spacing)
+    } else if slice_spacing.is_permissive() {
+        is_permissive_simple_expr(expr)
     } else {
-        expr.is_literal_expr() || expr.is_name_expr()
+        is_basic_simple_expr(expr)
+    }
+}
+
+fn is_basic_simple_expr(expr: &Expr) -> bool {
+    expr.is_literal_expr() || expr.is_name_expr()
+}
+
+fn is_permissive_simple_expr(expr: &Expr) -> bool {
+    if is_basic_simple_expr(expr) {
+        true
+    } else if let Some(attribute) = expr.as_attribute_expr() {
+        is_permissive_attribute_base(attribute.value.as_ref())
+    } else if let Some(ExprBinOp {
+        left, op, right, ..
+    }) = expr.as_bin_op_expr()
+    {
+        match op {
+            Operator::Add | Operator::Sub => {
+                is_permissive_simple_expr(left) && is_permissive_simple_expr(right)
+            }
+            Operator::Mult | Operator::FloorDiv => {
+                (is_permissive_simple_expr(left) && is_permissive_constant_expr(right))
+                    || (is_permissive_constant_expr(left) && is_permissive_simple_expr(right))
+            }
+            _ => false,
+        }
+    } else {
+        false
+    }
+}
+
+fn is_permissive_attribute_base(expr: &Expr) -> bool {
+    expr.is_name_expr()
+        || expr
+            .as_attribute_expr()
+            .is_some_and(|attribute| is_permissive_attribute_base(attribute.value.as_ref()))
+}
+
+fn is_permissive_constant_expr(expr: &Expr) -> bool {
+    if let Some(ExprUnaryOp {
+        op: UnaryOp::UAdd | UnaryOp::USub | UnaryOp::Invert,
+        operand,
+        ..
+    }) = expr.as_unary_op_expr()
+    {
+        is_permissive_constant_expr(operand)
+    } else {
+        expr.is_literal_expr()
     }
 }
 

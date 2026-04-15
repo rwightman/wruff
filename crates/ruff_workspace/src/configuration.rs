@@ -41,7 +41,8 @@ use ruff_linter::{
 };
 use ruff_python_ast as ast;
 use ruff_python_formatter::{
-    DocstringCode, DocstringCodeLineWidth, MagicTrailingComma, QuoteStyle,
+    ArgumentIndent, DocstringCode, DocstringCodeLineWidth, MagicTrailingComma, QuoteStyle,
+    SliceSpacing,
 };
 
 use crate::options::{
@@ -192,6 +193,9 @@ impl Configuration {
                 }),
             line_ending: format.line_ending.unwrap_or(format_defaults.line_ending),
             indent_style: format.indent_style.unwrap_or(format_defaults.indent_style),
+            argument_indent: format
+                .argument_indent
+                .unwrap_or(format_defaults.argument_indent),
             indent_width: self
                 .indent_width
                 .map_or(format_defaults.indent_width, |tab_size| {
@@ -204,6 +208,9 @@ impl Configuration {
             magic_trailing_comma: format
                 .magic_trailing_comma
                 .unwrap_or(format_defaults.magic_trailing_comma),
+            slice_spacing: format
+                .slice_spacing
+                .unwrap_or(format_defaults.slice_spacing),
             docstring_code_format: format
                 .docstring_code_format
                 .unwrap_or(format_defaults.docstring_code_format),
@@ -1253,10 +1260,12 @@ pub struct FormatConfiguration {
     pub extension: Option<ExtensionMapping>,
 
     pub indent_style: Option<IndentStyle>,
+    pub argument_indent: Option<ArgumentIndent>,
     pub quote_style: Option<QuoteStyle>,
     pub nested_string_quote_style: Option<ruff_python_formatter::NestedStringQuoteStyle>,
     pub magic_trailing_comma: Option<MagicTrailingComma>,
     pub line_ending: Option<LineEnding>,
+    pub slice_spacing: Option<SliceSpacing>,
     pub docstring_code_format: Option<DocstringCode>,
     pub docstring_code_line_width: Option<DocstringCodeLineWidth>,
 }
@@ -1278,6 +1287,7 @@ impl FormatConfiguration {
             }),
             preview: options.preview.map(PreviewMode::from),
             indent_style: options.indent_style,
+            argument_indent: options.argument_indent,
             quote_style: options.quote_style,
             nested_string_quote_style: options.nested_string_quote_style,
             magic_trailing_comma: options.skip_magic_trailing_comma.map(|skip| {
@@ -1288,6 +1298,7 @@ impl FormatConfiguration {
                 }
             }),
             line_ending: options.line_ending,
+            slice_spacing: options.slice_spacing,
             docstring_code_format: options.docstring_code_format.map(|yes| {
                 if yes {
                     DocstringCode::Enabled
@@ -1306,12 +1317,14 @@ impl FormatConfiguration {
             preview: self.preview.or(config.preview),
             extension: self.extension.or(config.extension),
             indent_style: self.indent_style.or(config.indent_style),
+            argument_indent: self.argument_indent.or(config.argument_indent),
             quote_style: self.quote_style.or(config.quote_style),
             nested_string_quote_style: self
                 .nested_string_quote_style
                 .or(config.nested_string_quote_style),
             magic_trailing_comma: self.magic_trailing_comma.or(config.magic_trailing_comma),
             line_ending: self.line_ending.or(config.line_ending),
+            slice_spacing: self.slice_spacing.or(config.slice_spacing),
             docstring_code_format: self.docstring_code_format.or(config.docstring_code_format),
             docstring_code_line_width: self
                 .docstring_code_line_width

@@ -40,7 +40,7 @@ use ruff_linter::{RuleSelector, warn_user_once};
 use ruff_macros::{CombineOptions, OptionsMetadata};
 use ruff_options_metadata::{OptionsMetadata, Visit};
 use ruff_python_ast::name::Name;
-use ruff_python_formatter::{DocstringCodeLineWidth, QuoteStyle};
+use ruff_python_formatter::{ArgumentIndent, DocstringCodeLineWidth, QuoteStyle, SliceSpacing};
 use ruff_python_semantic::NameImports;
 use ruff_python_stdlib::identifiers::is_identifier;
 
@@ -3794,6 +3794,37 @@ pub struct FormatOptions {
     )]
     pub indent_style: Option<IndentStyle>,
 
+    /// Controls how Ruff indents multiline function parameters.
+    ///
+    /// `argument-indent = "single"` (default):
+    ///
+    /// ```python
+    /// def function_name(
+    ///     first_argument,
+    ///     second_argument,
+    /// ):
+    ///     pass
+    /// ```
+    ///
+    /// `argument-indent = "double"`:
+    ///
+    /// ```python
+    /// def function_name(
+    ///         first_argument,
+    ///         second_argument,
+    /// ):
+    ///     pass
+    /// ```
+    #[option(
+        default = r#""single""#,
+        value_type = r#""single" | "double""#,
+        example = r#"
+            # Indent wrapped function parameters by two levels.
+            argument-indent = "double"
+        "#
+    )]
+    pub argument_indent: Option<ArgumentIndent>,
+
     /// Configures the preferred quote character for strings. The recommended options are
     ///
     /// * `double` (default): Use double quotes `"`
@@ -3891,6 +3922,22 @@ pub struct FormatOptions {
         "#
     )]
     pub line_ending: Option<LineEnding>,
+
+    /// Controls how aggressively Ruff inserts spaces around slice colons.
+    ///
+    /// `slice-spacing = "pep8"` (default) follows Black-style spacing rules.
+    ///
+    /// `slice-spacing = "permissive"` keeps compact slice formatting for simple arithmetic
+    /// and dotted attribute expressions like `args.n`, `a + 1`, and `i * 2`.
+    #[option(
+        default = r#""pep8""#,
+        value_type = r#""pep8" | "permissive""#,
+        example = r#"
+            # Allow more compact spacing in simple arithmetic and dotted-name slices.
+            slice-spacing = "permissive"
+        "#
+    )]
+    pub slice_spacing: Option<SliceSpacing>,
 
     /// Whether to format code snippets in docstrings.
     ///
