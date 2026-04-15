@@ -3,6 +3,7 @@ use ruff_python_ast::{AnyNodeRef, Parameters};
 use ruff_python_trivia::{CommentLinePosition, SimpleToken, SimpleTokenKind, SimpleTokenizer};
 use ruff_text_size::{Ranged, TextRange, TextSize};
 
+use crate::builders::double_soft_block_indent;
 use crate::comments::{
     SourceComment, dangling_comments, dangling_open_parenthesis_comments, leading_comments,
     leading_node_comments, trailing_comments,
@@ -231,7 +232,7 @@ impl FormatNodeRule<Parameters> for FormatParameters {
                     && has_trailing_comma(item, last_node, f.context().source())
                 {
                     // Make the magic trailing comma expand the group
-                    write!(f, [hard_line_break()])?;
+                    expand_parent().fmt(f)?;
                 }
             }
 
@@ -239,6 +240,8 @@ impl FormatNodeRule<Parameters> for FormatParameters {
         });
 
         let num_parameters = item.len();
+        let format_single_argument = &format_inner;
+        let format_multiple_arguments = group(&format_inner);
 
         if self.parentheses == ParametersParentheses::Never {
             write!(f, [group(&format_inner), dangling_comments(dangling)])
@@ -250,12 +253,19 @@ impl FormatNodeRule<Parameters> for FormatParameters {
             // If we have a single argument, avoid the inner group, to ensure that we insert a
             // trailing comma if the outer group breaks.
             let mut f = WithNodeLevel::new(NodeLevel::ParenthesizedExpression, f);
+            let format_parameters = format_with(|f: &mut PyFormatter| {
+                if f.options().argument_indent().is_double() {
+                    double_soft_block_indent(&format_single_argument).fmt(f)
+                } else {
+                    write!(f, [soft_block_indent(&format_single_argument)])
+                }
+            });
             write!(
                 f,
                 [
                     token("("),
                     dangling_open_parenthesis_comments(parenthesis_dangling),
-                    soft_block_indent(&format_inner),
+                    format_parameters,
                     token(")")
                 ]
             )
@@ -264,12 +274,19 @@ impl FormatNodeRule<Parameters> for FormatParameters {
             // We want parameters to be grouped alongside return types, one level up, so we
             // format them "inline" here.
             let mut f = WithNodeLevel::new(NodeLevel::ParenthesizedExpression, f);
+            let format_parameters = format_with(|f: &mut PyFormatter| {
+                if f.options().argument_indent().is_double() {
+                    double_soft_block_indent(&format_multiple_arguments).fmt(f)
+                } else {
+                    write!(f, [soft_block_indent(&format_multiple_arguments)])
+                }
+            });
             write!(
                 f,
                 [
                     token("("),
                     dangling_open_parenthesis_comments(parenthesis_dangling),
-                    soft_block_indent(&group(&format_inner)),
+                    format_parameters,
                     token(")")
                 ]
             )

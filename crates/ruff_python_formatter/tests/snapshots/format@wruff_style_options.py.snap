@@ -1,0 +1,221 @@
+---
+source: crates/ruff_python_formatter/tests/fixtures.rs
+assertion_line: 309
+input_file: crates/ruff_python_formatter/resources/test/fixtures/ruff/wruff_style_options.py
+---
+## Input
+```python
+def configure_formatter_behavior(
+    first_argument, second_argument, third_argument, fourth_argument
+):
+    return helper_call(
+        first_argument, second_argument, third_argument, fourth_argument
+    )
+
+
+result = helper_call(first_argument, second_argument, third_argument, fourth_argument)
+
+compact = sequence[start + 1 : stop + 1]
+stepped = sequence[offset :: step + 1]
+nested = sequence[start + delta : stop - 1]
+attribute = sequence[record.value : stop]
+negated_attribute = sequence[-args.n :]
+scaled = sequence[index * 2 : stop * 2]
+floored = sequence[index // 2 : stop // 2]
+```
+
+## Outputs
+### Output 1
+```
+indent-style               = space
+line-width                 = 50
+indent-width               = 4
+quote-style                = Double
+line-ending                = LineFeed
+magic-trailing-comma       = Respect
+docstring-code             = Disabled
+docstring-code-line-width  = "dynamic"
+preview                    = Disabled
+target_version             = 3.10
+source_type                = Python
+nested-string-quote-style  = alternating
+```
+
+```python
+def configure_formatter_behavior(
+    first_argument,
+    second_argument,
+    third_argument,
+    fourth_argument,
+):
+    return helper_call(
+        first_argument,
+        second_argument,
+        third_argument,
+        fourth_argument,
+    )
+
+
+result = helper_call(
+    first_argument,
+    second_argument,
+    third_argument,
+    fourth_argument,
+)
+
+compact = sequence[start + 1 : stop + 1]
+stepped = sequence[offset :: step + 1]
+nested = sequence[start + delta : stop - 1]
+attribute = sequence[record.value : stop]
+negated_attribute = sequence[-args.n :]
+scaled = sequence[index * 2 : stop * 2]
+floored = sequence[index // 2 : stop // 2]
+```
+
+
+### Output 2
+```
+indent-style               = space
+argument-indent            = double
+line-width                 = 50
+indent-width               = 4
+quote-style                = Double
+line-ending                = LineFeed
+magic-trailing-comma       = Respect
+docstring-code             = Disabled
+docstring-code-line-width  = "dynamic"
+preview                    = Disabled
+target_version             = 3.10
+source_type                = Python
+nested-string-quote-style  = alternating
+```
+
+```python
+def configure_formatter_behavior(
+        first_argument,
+        second_argument,
+        third_argument,
+        fourth_argument,
+):
+    return helper_call(
+        first_argument,
+        second_argument,
+        third_argument,
+        fourth_argument,
+    )
+
+
+result = helper_call(
+    first_argument,
+    second_argument,
+    third_argument,
+    fourth_argument,
+)
+
+compact = sequence[start + 1 : stop + 1]
+stepped = sequence[offset :: step + 1]
+nested = sequence[start + delta : stop - 1]
+attribute = sequence[record.value : stop]
+negated_attribute = sequence[-args.n :]
+scaled = sequence[index * 2 : stop * 2]
+floored = sequence[index // 2 : stop // 2]
+```
+
+
+### Output 3
+```
+indent-style               = space
+line-width                 = 50
+indent-width               = 4
+quote-style                = Double
+line-ending                = LineFeed
+magic-trailing-comma       = Respect
+slice-spacing              = permissive
+docstring-code             = Disabled
+docstring-code-line-width  = "dynamic"
+preview                    = Disabled
+target_version             = 3.10
+source_type                = Python
+nested-string-quote-style  = alternating
+```
+
+```python
+def configure_formatter_behavior(
+    first_argument,
+    second_argument,
+    third_argument,
+    fourth_argument,
+):
+    return helper_call(
+        first_argument,
+        second_argument,
+        third_argument,
+        fourth_argument,
+    )
+
+
+result = helper_call(
+    first_argument,
+    second_argument,
+    third_argument,
+    fourth_argument,
+)
+
+compact = sequence[start + 1:stop + 1]
+stepped = sequence[offset::step + 1]
+nested = sequence[start + delta:stop - 1]
+attribute = sequence[record.value:stop]
+negated_attribute = sequence[-args.n:]
+scaled = sequence[index * 2:stop * 2]
+floored = sequence[index // 2:stop // 2]
+```
+
+
+### Output 4
+```
+indent-style               = space
+argument-indent            = double
+line-width                 = 50
+indent-width               = 4
+quote-style                = Double
+line-ending                = LineFeed
+magic-trailing-comma       = Respect
+slice-spacing              = permissive
+docstring-code             = Disabled
+docstring-code-line-width  = "dynamic"
+preview                    = Disabled
+target_version             = 3.10
+source_type                = Python
+nested-string-quote-style  = alternating
+```
+
+```python
+def configure_formatter_behavior(
+        first_argument,
+        second_argument,
+        third_argument,
+        fourth_argument,
+):
+    return helper_call(
+        first_argument,
+        second_argument,
+        third_argument,
+        fourth_argument,
+    )
+
+
+result = helper_call(
+    first_argument,
+    second_argument,
+    third_argument,
+    fourth_argument,
+)
+
+compact = sequence[start + 1:stop + 1]
+stepped = sequence[offset::step + 1]
+nested = sequence[start + delta:stop - 1]
+attribute = sequence[record.value:stop]
+negated_attribute = sequence[-args.n:]
+scaled = sequence[index * 2:stop * 2]
+floored = sequence[index // 2:stop // 2]
+```

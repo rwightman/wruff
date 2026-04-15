@@ -1,0 +1,18 @@
+[
+  {
+    "line_width": 50
+  },
+  {
+    "line_width": 50,
+    "argument_indent": "double"
+  },
+  {
+    "line_width": 50,
+    "slice_spacing": "permissive"
+  },
+  {
+    "line_width": 50,
+    "argument_indent": "double",
+    "slice_spacing": "permissive"
+  }
+]

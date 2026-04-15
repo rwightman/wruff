@@ -69,6 +69,12 @@ pub struct PyFormatOptions {
     /// inside interpolated string expressions. When set to `preferred`, Ruff will use
     /// the configured `quote-style`.
     nested_string_quote_style: NestedStringQuoteStyle,
+
+    /// Controls how multiline function parameters are indented.
+    argument_indent: ArgumentIndent,
+
+    /// Controls how aggressively Ruff inserts spaces around slice colons.
+    slice_spacing: SliceSpacing,
 }
 
 fn default_line_width() -> LineWidth {
@@ -99,6 +105,8 @@ impl Default for PyFormatOptions {
             docstring_code_line_width: DocstringCodeLineWidth::default(),
             preview: PreviewMode::default(),
             nested_string_quote_style: NestedStringQuoteStyle::default(),
+            argument_indent: ArgumentIndent::default(),
+            slice_spacing: SliceSpacing::default(),
         }
     }
 }
@@ -154,6 +162,14 @@ impl PyFormatOptions {
 
     pub const fn nested_string_quote_style(&self) -> NestedStringQuoteStyle {
         self.nested_string_quote_style
+    }
+
+    pub const fn argument_indent(&self) -> ArgumentIndent {
+        self.argument_indent
+    }
+
+    pub const fn slice_spacing(&self) -> SliceSpacing {
+        self.slice_spacing
     }
 
     #[must_use]
@@ -222,6 +238,18 @@ impl PyFormatOptions {
         nested_string_quote_style: NestedStringQuoteStyle,
     ) -> Self {
         self.nested_string_quote_style = nested_string_quote_style;
+        self
+    }
+
+    #[must_use]
+    pub fn with_argument_indent(mut self, argument_indent: ArgumentIndent) -> Self {
+        self.argument_indent = argument_indent;
+        self
+    }
+
+    #[must_use]
+    pub fn with_slice_spacing(mut self, slice_spacing: SliceSpacing) -> Self {
+        self.slice_spacing = slice_spacing;
         self
     }
 
@@ -344,6 +372,86 @@ impl FromStr for MagicTrailingComma {
             "ignore" | "Ignore" => Ok(Self::Ignore),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for MagicTrailingComma"),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, CacheKey)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "kebab-case")
+)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+pub enum ArgumentIndent {
+    #[default]
+    Single,
+    Double,
+}
+
+impl ArgumentIndent {
+    pub const fn is_double(self) -> bool {
+        matches!(self, Self::Double)
+    }
+}
+
+impl fmt::Display for ArgumentIndent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            ArgumentIndent::Single => "single",
+            ArgumentIndent::Double => "double",
+        })
+    }
+}
+
+impl FromStr for ArgumentIndent {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "single" | "Single" => Ok(Self::Single),
+            "double" | "Double" => Ok(Self::Double),
+            _ => Err("Value not supported for ArgumentIndent"),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, CacheKey)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "kebab-case")
+)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+pub enum SliceSpacing {
+    #[default]
+    Pep8,
+    Permissive,
+}
+
+impl SliceSpacing {
+    pub const fn is_permissive(self) -> bool {
+        matches!(self, Self::Permissive)
+    }
+}
+
+impl fmt::Display for SliceSpacing {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            SliceSpacing::Pep8 => "pep8",
+            SliceSpacing::Permissive => "permissive",
+        })
+    }
+}
+
+impl FromStr for SliceSpacing {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "pep8" | "Pep8" => Ok(Self::Pep8),
+            "permissive" | "Permissive" => Ok(Self::Permissive),
+            _ => Err("Value not supported for SliceSpacing"),
         }
     }
 }

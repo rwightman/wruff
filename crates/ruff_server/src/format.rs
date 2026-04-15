@@ -260,6 +260,12 @@ impl UvFormatCommand {
         ));
 
         command.arg("--config");
+        command.arg(format!(
+            "format.argument-indent = '{}'",
+            self.options.argument_indent()
+        ));
+
+        command.arg("--config");
         command.arg(format!("indent-width = {}", self.options.indent_width()));
 
         command.arg("--config");
@@ -281,6 +287,12 @@ impl UvFormatCommand {
                 ruff_python_formatter::MagicTrailingComma::Respect => "false",
                 ruff_python_formatter::MagicTrailingComma::Ignore => "true",
             }
+        ));
+
+        command.arg("--config");
+        command.arg(format!(
+            "format.slice-spacing = '{}'",
+            self.options.slice_spacing()
         ));
 
         if let Some((range, line_index, source)) = range_with_index {

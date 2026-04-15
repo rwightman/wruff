@@ -87,7 +87,6 @@ impl FormatNodeRule<Arguments> for FormatArguments {
         // )
         let comments = f.context().comments().clone();
         let dangling_comments = comments.dangling(item);
-
         write!(
             f,
             [
