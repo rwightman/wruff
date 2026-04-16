@@ -1642,6 +1642,13 @@
             }
           ]
         },
+        "preserve-multiline": {
+          "description": "Preserve multiline layouts for function parameters and comma-separated constructs that use\nRuff's shared joiner, like call arguments, list elements, dict items, and import names,\nwhen the source already spans multiple lines.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
         "preview": {
           "description": "Whether to enable the unstable preview style formatting.",
           "type": [

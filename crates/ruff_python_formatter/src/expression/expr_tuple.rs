@@ -217,6 +217,7 @@ impl<'a> ExprSequence<'a> {
 impl Format<PyFormatContext<'_>> for ExprSequence<'_> {
     fn fmt(&self, f: &mut PyFormatter) -> FormatResult<()> {
         f.join_comma_separated(self.tuple.end())
+            .with_sequence_start(self.tuple.start())
             .nodes(&self.tuple.elts)
             .finish()
     }

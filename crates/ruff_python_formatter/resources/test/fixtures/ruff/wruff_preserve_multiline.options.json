@@ -1,0 +1,9 @@
+[
+  {
+    "line_width": 50
+  },
+  {
+    "line_width": 50,
+    "preserve_multiline": true
+  }
+]

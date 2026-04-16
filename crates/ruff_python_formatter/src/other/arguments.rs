@@ -36,7 +36,9 @@ impl FormatNodeRule<Arguments> for FormatArguments {
 
         let all_arguments = format_with(|f: &mut PyFormatter| {
             let source = f.context().source();
-            let mut joiner = f.join_comma_separated(range.end());
+            let mut joiner = f
+                .join_comma_separated(range.end())
+                .with_sequence_start(range.start());
             match args.as_ref() {
                 [arg] if keywords.is_empty() => {
                     match arg {

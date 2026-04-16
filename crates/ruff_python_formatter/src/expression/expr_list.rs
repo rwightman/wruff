@@ -29,6 +29,7 @@ impl FormatNodeRule<ExprList> for FormatExprList {
 
         let items = format_with(|f| {
             f.join_comma_separated(item.end())
+                .with_sequence_start(item.start())
                 .nodes(elts.iter())
                 .finish()
         });

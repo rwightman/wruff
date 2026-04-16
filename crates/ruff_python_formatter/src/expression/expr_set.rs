@@ -20,6 +20,7 @@ impl FormatNodeRule<ExprSet> for FormatExprSet {
         // Avoid second mutable borrow of f
         let joined = format_with(|f: &mut PyFormatter| {
             f.join_comma_separated(item.end())
+                .with_sequence_start(item.start())
                 .nodes(elts.iter())
                 .finish()
         });

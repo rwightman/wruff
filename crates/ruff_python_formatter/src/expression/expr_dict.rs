@@ -40,7 +40,9 @@ impl FormatNodeRule<ExprDict> for FormatExprDict {
             }));
 
         let format_pairs = format_with(|f| {
-            let mut joiner = f.join_comma_separated(item.end());
+            let mut joiner = f
+                .join_comma_separated(item.end())
+                .with_sequence_start(item.start());
 
             let mut key_value_comments = key_value_comments;
             for dict_item in items {

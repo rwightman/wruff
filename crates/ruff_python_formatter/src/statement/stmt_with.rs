@@ -86,8 +86,9 @@ impl FormatNodeRule<StmtWith> for FormatStmtWith {
 
                         WithItemsLayout::ParenthesizeIfExpands => {
                             parenthesize_if_expands(&format_with(|f| {
-                                let mut joiner =
-                                    f.join_comma_separated(with_stmt.body.first().unwrap().start());
+                                let mut joiner = f
+                                    .join_comma_separated(with_stmt.body.first().unwrap().start())
+                                    .with_sequence_start(with_stmt.start());
 
                                 for item in &with_stmt.items {
                                     joiner.entry_with_line_separator(
@@ -117,8 +118,9 @@ impl FormatNodeRule<StmtWith> for FormatStmtWith {
                         WithItemsLayout::Parenthesized => parenthesized(
                             "(",
                             &format_with(|f: &mut PyFormatter| {
-                                let mut joiner =
-                                    f.join_comma_separated(with_stmt.body.first().unwrap().start());
+                                let mut joiner = f
+                                    .join_comma_separated(with_stmt.body.first().unwrap().start())
+                                    .with_sequence_start(with_stmt.start());
 
                                 for item in &with_stmt.items {
                                     joiner.entry(
