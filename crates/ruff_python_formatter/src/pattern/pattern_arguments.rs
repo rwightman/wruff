@@ -25,7 +25,9 @@ impl FormatNodeRule<PatternArguments> for FormatPatternArguments {
 
         let all_arguments = format_with(|f: &mut PyFormatter| {
             let source = f.context().source();
-            let mut joiner = f.join_comma_separated(item.end());
+            let mut joiner = f
+                .join_comma_separated(item.end())
+                .with_sequence_start(item.start());
             match item.patterns.as_slice() {
                 [pattern] if item.keywords.is_empty() => {
                     let parentheses =

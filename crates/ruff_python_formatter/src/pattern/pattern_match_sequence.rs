@@ -46,6 +46,7 @@ impl FormatNodeRule<PatternMatchSequence> for FormatPatternMatchSequence {
 
         let items = format_with(|f| {
             f.join_comma_separated(range.end())
+                .with_sequence_start(range.start())
                 .nodes(patterns.iter())
                 .finish()
         });

@@ -73,6 +73,10 @@ pub struct PyFormatOptions {
     /// Controls how multiline function parameters are indented.
     argument_indent: ArgumentIndent,
 
+    /// Preserves multiline layouts for function parameters and comma-separated constructs that
+    /// use the shared joiner.
+    preserve_multiline: bool,
+
     /// Controls how aggressively Ruff inserts spaces around slice colons.
     slice_spacing: SliceSpacing,
 }
@@ -106,6 +110,7 @@ impl Default for PyFormatOptions {
             preview: PreviewMode::default(),
             nested_string_quote_style: NestedStringQuoteStyle::default(),
             argument_indent: ArgumentIndent::default(),
+            preserve_multiline: false,
             slice_spacing: SliceSpacing::default(),
         }
     }
@@ -166,6 +171,10 @@ impl PyFormatOptions {
 
     pub const fn argument_indent(&self) -> ArgumentIndent {
         self.argument_indent
+    }
+
+    pub const fn preserve_multiline(&self) -> bool {
+        self.preserve_multiline
     }
 
     pub const fn slice_spacing(&self) -> SliceSpacing {
@@ -244,6 +253,12 @@ impl PyFormatOptions {
     #[must_use]
     pub fn with_argument_indent(mut self, argument_indent: ArgumentIndent) -> Self {
         self.argument_indent = argument_indent;
+        self
+    }
+
+    #[must_use]
+    pub fn with_preserve_multiline(mut self, preserve_multiline: bool) -> Self {
+        self.preserve_multiline = preserve_multiline;
         self
     }
 

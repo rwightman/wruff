@@ -1,0 +1,104 @@
+---
+source: crates/ruff_python_formatter/tests/fixtures.rs
+input_file: crates/ruff_python_formatter/resources/test/fixtures/ruff/wruff_preserve_multiline.py
+---
+## Input
+```python
+def f(
+    a, b, c
+):
+    return g(
+        a, b, c
+    )
+
+
+items = [
+    a, b, c
+]
+
+mapping = {
+    a: b, c: d
+}
+
+from mod import (
+    a, b, c
+)
+```
+
+## Outputs
+### Output 1
+```
+indent-style               = space
+line-width                 = 50
+indent-width               = 4
+quote-style                = Double
+line-ending                = LineFeed
+magic-trailing-comma       = Respect
+docstring-code             = Disabled
+docstring-code-line-width  = "dynamic"
+preview                    = Disabled
+target_version             = 3.10
+source_type                = Python
+nested-string-quote-style  = alternating
+```
+
+```python
+def f(a, b, c):
+    return g(a, b, c)
+
+
+items = [a, b, c]
+
+mapping = {a: b, c: d}
+
+from mod import a, b, c
+```
+
+
+### Output 2
+```
+indent-style               = space
+preserve-multiline         = true
+line-width                 = 50
+indent-width               = 4
+quote-style                = Double
+line-ending                = LineFeed
+magic-trailing-comma       = Respect
+docstring-code             = Disabled
+docstring-code-line-width  = "dynamic"
+preview                    = Disabled
+target_version             = 3.10
+source_type                = Python
+nested-string-quote-style  = alternating
+```
+
+```python
+def f(
+    a,
+    b,
+    c,
+):
+    return g(
+        a,
+        b,
+        c,
+    )
+
+
+items = [
+    a,
+    b,
+    c,
+]
+
+mapping = {
+    a: b,
+    c: d,
+}
+
+from mod import (
+    a,
+    b,
+    c,
+)
+```

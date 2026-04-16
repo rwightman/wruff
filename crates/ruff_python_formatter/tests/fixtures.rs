@@ -579,6 +579,9 @@ impl fmt::Display for DisplayPyOptions<'_> {
                 self.0.argument_indent()
             )?;
         }
+        if self.0.preserve_multiline() {
+            writeln!(f, "preserve-multiline         = true")?;
+        }
         writeln!(
             f,
             "line-width                 = {}",

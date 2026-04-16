@@ -52,6 +52,7 @@ impl FormatNodeRule<StmtImportFrom> for FormatStmtImportFrom {
 
         let names = format_with(|f| {
             f.join_comma_separated(item.end())
+                .with_sequence_start(item.start())
                 .with_trailing_comma(TrailingComma::OneOrMore)
                 .entries(names.iter().map(|name| (name, name.format())))
                 .finish()

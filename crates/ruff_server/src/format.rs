@@ -266,6 +266,12 @@ impl UvFormatCommand {
         ));
 
         command.arg("--config");
+        command.arg(format!(
+            "format.preserve-multiline = {}",
+            self.options.preserve_multiline()
+        ));
+
+        command.arg("--config");
         command.arg(format!("indent-width = {}", self.options.indent_width()));
 
         command.arg("--config");

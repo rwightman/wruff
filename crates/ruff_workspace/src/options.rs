@@ -3907,6 +3907,16 @@ pub struct FormatOptions {
     )]
     pub skip_magic_trailing_comma: Option<bool>,
 
+    /// Preserve multiline layouts for function parameters and comma-separated constructs that use
+    /// Ruff's shared joiner, like call arguments, list elements, dict items, and import names,
+    /// when the source already spans multiple lines.
+    #[option(
+        default = r#"false"#,
+        value_type = r#"bool"#,
+        example = "preserve-multiline = true"
+    )]
+    pub preserve_multiline: Option<bool>,
+
     /// The character Ruff uses at the end of a line.
     ///
     /// * `auto`: The newline style is detected automatically on a file per file basis. Files with mixed line endings will be converted to the first detected line ending. Defaults to `\n` for files that contain no line endings.

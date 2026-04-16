@@ -67,7 +67,9 @@ impl FormatNodeRule<PatternMatchMapping> for FormatPatternMatchMapping {
             };
 
         let format_pairs = format_with(|f| {
-            let mut joiner = f.join_comma_separated(item.end());
+            let mut joiner = f
+                .join_comma_separated(item.end())
+                .with_sequence_start(item.start());
 
             for (key, pattern) in keys.iter().zip(patterns) {
                 let key_pattern_pair = KeyPatternPair { key, pattern };

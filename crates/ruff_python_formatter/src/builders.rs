@@ -1,4 +1,5 @@
 use ruff_formatter::{Argument, Arguments, format_args, write};
+use ruff_source_file::LineRanges;
 use ruff_text_size::{Ranged, TextRange, TextSize};
 
 use crate::context::{NodeLevel, WithNodeLevel};
@@ -144,7 +145,9 @@ pub(crate) struct JoinCommaSeparatedBuilder<'fmt, 'ast, 'buf> {
     result: FormatResult<()>,
     fmt: &'fmt mut PyFormatter<'ast, 'buf>,
     entries: Entries,
+    sequence_start: Option<TextSize>,
     sequence_end: TextSize,
+    has_source_line_break: bool,
     trailing_comma: TrailingComma,
 }
 
@@ -154,7 +157,9 @@ impl<'fmt, 'ast, 'buf> JoinCommaSeparatedBuilder<'fmt, 'ast, 'buf> {
             fmt: f,
             result: Ok(()),
             entries: Entries::None,
+            sequence_start: None,
             sequence_end,
+            has_source_line_break: false,
             trailing_comma: TrailingComma::default(),
         }
     }
@@ -165,6 +170,11 @@ impl<'fmt, 'ast, 'buf> JoinCommaSeparatedBuilder<'fmt, 'ast, 'buf> {
     /// trailing commas are inserted for single element groups.
     pub(crate) fn with_trailing_comma(mut self, trailing_comma: TrailingComma) -> Self {
         self.trailing_comma = trailing_comma;
+        self
+    }
+
+    pub(crate) fn with_sequence_start(mut self, sequence_start: TextSize) -> Self {
+        self.sequence_start = Some(sequence_start);
         self
     }
 
@@ -190,6 +200,22 @@ impl<'fmt, 'ast, 'buf> JoinCommaSeparatedBuilder<'fmt, 'ast, 'buf> {
         Separator: Format<PyFormatContext<'ast>>,
     {
         self.result = self.result.and_then(|()| {
+            let entry_start = node.start();
+
+            if let Some(previous_end) = self.entries.position() {
+                self.has_source_line_break |= self
+                    .fmt
+                    .context()
+                    .source()
+                    .contains_line_break(TextRange::new(previous_end, entry_start));
+            } else if let Some(sequence_start) = self.sequence_start {
+                self.has_source_line_break |= self
+                    .fmt
+                    .context()
+                    .source()
+                    .contains_line_break(TextRange::new(sequence_start, entry_start));
+            }
+
             if self.entries.is_one_or_more() {
                 write!(self.fmt, [token(","), separator])?;
             }
@@ -248,6 +274,13 @@ impl<'fmt, 'ast, 'buf> JoinCommaSeparatedBuilder<'fmt, 'ast, 'buf> {
                     TextRange::new(last_end, self.sequence_end),
                     self.fmt.context(),
                 );
+                let preserve_multiline = self.fmt.options().preserve_multiline()
+                    && (self.has_source_line_break
+                        || self
+                            .fmt
+                            .context()
+                            .source()
+                            .contains_line_break(TextRange::new(last_end, self.sequence_end)));
 
                 // If there is a single entry, only keep the magic trailing comma, don't add it if
                 // it wasn't there -- unless the trailing comma behavior is set to one-or-more.
@@ -258,7 +291,7 @@ impl<'fmt, 'ast, 'buf> JoinCommaSeparatedBuilder<'fmt, 'ast, 'buf> {
                     if_group_breaks(&token(",")).fmt(self.fmt)?;
                 }
 
-                if magic_trailing_comma {
+                if magic_trailing_comma || preserve_multiline {
                     expand_parent().fmt(self.fmt)?;
                 }
             }

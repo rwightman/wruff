@@ -50,6 +50,7 @@ impl FormatNodeRule<StmtDelete> for FormatStmtDelete {
             targets => {
                 let item = format_with(|f| {
                     f.join_comma_separated(item.end())
+                        .with_sequence_start(item.start())
                         .nodes(targets.iter())
                         .finish()
                 });

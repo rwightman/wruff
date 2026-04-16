@@ -1,6 +1,7 @@
 use ruff_formatter::{FormatRuleWithOptions, format_args, write};
 use ruff_python_ast::{AnyNodeRef, Parameters};
 use ruff_python_trivia::{CommentLinePosition, SimpleToken, SimpleTokenKind, SimpleTokenizer};
+use ruff_source_file::LineRanges;
 use ruff_text_size::{Ranged, TextRange, TextSize};
 
 use crate::builders::double_soft_block_indent;
@@ -99,6 +100,9 @@ impl FormatNodeRule<Parameters> for FormatParameters {
         // argument separators, e.g., `*` or `/`).
         let (parenthesis_dangling, parameters_dangling) =
             dangling.split_at(parenthesis_comments_end);
+        let preserve_multiline_parameters = self.parentheses != ParametersParentheses::Never
+            && f.options().preserve_multiline()
+            && f.context().source().contains_line_break(item.range());
 
         let format_inner = format_with(|f: &mut PyFormatter| {
             let separator = format_with(|f: &mut PyFormatter| {
@@ -232,6 +236,10 @@ impl FormatNodeRule<Parameters> for FormatParameters {
                     && has_trailing_comma(item, last_node, f.context().source())
                 {
                     // Make the magic trailing comma expand the group
+                    expand_parent().fmt(f)?;
+                }
+
+                if preserve_multiline_parameters {
                     expand_parent().fmt(f)?;
                 }
             }
