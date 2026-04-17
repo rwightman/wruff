@@ -1,6 +1,6 @@
 # Configuring Ruff
 
-Ruff can be configured through a `pyproject.toml`, `ruff.toml`, or `.ruff.toml` file.
+Ruff can be configured through a `pyproject.toml`, `wruff.toml`, `.wruff.toml`, `ruff.toml`, or `.ruff.toml` file.
 
 Whether you're using Ruff as a linter, formatter, or both, the underlying configuration strategy and
 semantics are the same.
@@ -28,6 +28,7 @@ If left unspecified, Ruff's default configuration is equivalent to:
         ".pyenv",
         ".pytest_cache",
         ".pytype",
+        ".wruff_cache",
         ".ruff_cache",
         ".svn",
         ".tox",
@@ -43,8 +44,8 @@ If left unspecified, Ruff's default configuration is equivalent to:
         "venv",
     ]
 
-    # Same as Black.
-    line-length = 88
+    # Prefer 120-character lines by default.
+    line-length = 120
     indent-width = 4
 
     # Assume Python 3.10
@@ -71,11 +72,20 @@ If left unspecified, Ruff's default configuration is equivalent to:
     # Like Black, indent with spaces, rather than tabs.
     indent-style = "space"
 
+    # Indent wrapped function parameters by two levels.
+    argument-indent = "double"
+
     # Like Black, respect magic trailing commas.
     skip-magic-trailing-comma = false
 
+    # Preserve existing multiline layouts for parameters and comma-separated constructs.
+    preserve-multiline = true
+
     # Like Black, automatically detect the appropriate line ending.
     line-ending = "auto"
+
+    # Allow compact spacing in simple arithmetic and dotted-name slices.
+    slice-spacing = "permissive"
 
     # Enable auto-formatting of code examples in docstrings. Markdown,
     # reStructuredText code/literal blocks and doctests are all supported.
@@ -110,6 +120,7 @@ If left unspecified, Ruff's default configuration is equivalent to:
         ".pyenv",
         ".pytest_cache",
         ".pytype",
+        ".wruff_cache",
         ".ruff_cache",
         ".svn",
         ".tox",
@@ -125,8 +136,8 @@ If left unspecified, Ruff's default configuration is equivalent to:
         "venv",
     ]
 
-    # Same as Black.
-    line-length = 88
+    # Prefer 120-character lines by default.
+    line-length = 120
     indent-width = 4
 
     # Assume Python 3.10
@@ -153,11 +164,20 @@ If left unspecified, Ruff's default configuration is equivalent to:
     # Like Black, indent with spaces, rather than tabs.
     indent-style = "space"
 
+    # Indent wrapped function parameters by two levels.
+    argument-indent = "double"
+
     # Like Black, respect magic trailing commas.
     skip-magic-trailing-comma = false
 
+    # Preserve existing multiline layouts for parameters and comma-separated constructs.
+    preserve-multiline = true
+
     # Like Black, automatically detect the appropriate line ending.
     line-ending = "auto"
+
+    # Allow compact spacing in simple arithmetic and dotted-name slices.
+    slice-spacing = "permissive"
 
     # Enable auto-formatting of code examples in docstrings. Markdown,
     # reStructuredText code/literal blocks and doctests are all supported.
@@ -246,9 +266,10 @@ Linter plugin configurations are expressed as subsections, e.g.:
     docstring-quotes = "double"
     ```
 
-Ruff respects `pyproject.toml`, `ruff.toml`, and `.ruff.toml` files. All three implement an
-equivalent schema (though in the `ruff.toml` and `.ruff.toml` versions, the `[tool.ruff]` header and
-`tool.ruff` section prefix is omitted).
+Ruff respects `pyproject.toml`, `wruff.toml`, `.wruff.toml`, `ruff.toml`, and `.ruff.toml` files.
+All five implement an equivalent schema. In `pyproject.toml`, both `[tool.wruff]` and
+`[tool.ruff]` are accepted, though `[tool.wruff]` is preferred. In the standalone TOML files, the
+tool section prefix is omitted.
 
 For a complete enumeration of the available configuration options, see [_Settings_](settings.md).
 
@@ -263,13 +284,14 @@ config file.
 There are a few exceptions to these rules:
 
 1. In locating the "closest" `pyproject.toml` file for a given path, Ruff ignores any
-    `pyproject.toml` files that lack a `[tool.ruff]` section.
+    `pyproject.toml` files that lack a `[tool.wruff]` or `[tool.ruff]` section.
 1. If a configuration file is passed directly via `--config`, those settings are used for _all_
     analyzed files, and any relative paths in that configuration file (like `exclude` globs or
     `src` paths) are resolved relative to the _current_ working directory.
 1. If no config file is found in the filesystem hierarchy, Ruff will fall back to using
     a default configuration. If a user-specific configuration file exists
-    at `${config_dir}/ruff/pyproject.toml`, that file will be used instead of the default
+    at `${config_dir}/wruff/pyproject.toml` or the legacy `${config_dir}/ruff/pyproject.toml`,
+    that file will be used instead of the default
     configuration, with `${config_dir}` being determined via [`etcetera`'s base strategy](https://docs.rs/etcetera/latest/etcetera/#native-strategy),
     and all relative paths being again resolved relative to the _current working directory_.
 1. Any config-file-supported settings that are provided on the command-line (e.g., via
@@ -302,10 +324,11 @@ config file, like so:
     line-length = 100
     ```
 
-All of the above rules apply equivalently to `pyproject.toml`, `ruff.toml`, and `.ruff.toml` files.
-If Ruff detects multiple configuration files in the same directory, the `.ruff.toml` file will take
-precedence over the `ruff.toml` file, and the `ruff.toml` file will take precedence over
-the `pyproject.toml` file.
+All of the above rules apply equivalently to `pyproject.toml`, `wruff.toml`, `.wruff.toml`,
+`ruff.toml`, and `.ruff.toml` files. If Ruff detects multiple configuration files in the same
+directory, `.wruff.toml` takes precedence over `wruff.toml`, `wruff.toml` takes precedence over
+`.ruff.toml`, `.ruff.toml` takes precedence over `ruff.toml`, and `ruff.toml` takes precedence
+over `pyproject.toml`.
 
 ### Inferring the Python version
 When no discovered configuration specifies a [`target-version`](settings.md#target-version), Ruff will attempt to fall back to the minimum version compatible with the `requires-python` field in a nearby `pyproject.toml`.
@@ -313,7 +336,7 @@ The rules for this behavior are as follows:
 
 1. If a configuration file is passed directly, Ruff does not attempt to infer a missing `target-version`.
 1. If a configuration file is found in the filesystem hierarchy, Ruff will infer a missing `target-version` from the `requires-python` field in a `pyproject.toml` file in the same directory as the found configuration.
-1. If we are using a user-level configuration from `${config_dir}/ruff/pyproject.toml`, the `requires-python` field in the first `pyproject.toml` file found in an ancestor of the current working directory takes precedence over the `target-version` in the user-level configuration.
+1. If we are using a user-level configuration from `${config_dir}/wruff/pyproject.toml` or the legacy `${config_dir}/ruff/pyproject.toml`, the `requires-python` field in the first `pyproject.toml` file found in an ancestor of the current working directory takes precedence over the `target-version` in the user-level configuration.
 1. If no configuration files are found, Ruff will infer the `target-version` from the `requires-python` field in the first `pyproject.toml` file found in an ancestor of the current working directory.
 
 Note that in these last two cases, the behavior of Ruff may differ depending on the working directory from which it is invoked.
@@ -523,9 +546,9 @@ See `ruff help` for the full list of Ruff's top-level commands:
 <!-- Begin auto-generated command help. -->
 
 ```text
-Ruff: An extremely fast Python linter and code formatter.
+Wruff: An extremely fast Python linter and code formatter.
 
-Usage: ruff [OPTIONS] <COMMAND>
+Usage: wruff [OPTIONS] <COMMAND>
 
 Commands:
   check    Run Ruff on the given files or directories
@@ -551,19 +574,20 @@ Log levels:
 
 Global options:
       --config <CONFIG_OPTION>
-          Either a path to a TOML configuration file (`pyproject.toml` or
-          `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such as you might
-          find in a `ruff.toml` configuration file) overriding a specific
-          configuration option. Overrides of individual settings using this
-          option always take precedence over all configuration files, including
-          configuration files that were also specified using `--config`
+          Either a path to a TOML configuration file (`pyproject.toml`,
+          `wruff.toml`, or `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such
+          as you might find in a `wruff.toml` configuration file) overriding a
+          specific configuration option. Overrides of individual settings using
+          this option always take precedence over all configuration files,
+          including configuration files that were also specified using
+          `--config`
       --isolated
           Ignore all configuration files
       --color <WHEN>
           Control when colored output is used [possible values: auto, always,
           never]
 
-For help with a specific command, see: `ruff help <command>`.
+For help with a specific command, see: `wruff help <command>`.
 ```
 
 <!-- End auto-generated command help. -->
@@ -575,7 +599,7 @@ Or `ruff help check` for more on the linting command:
 ```text
 Run Ruff on the given files or directories
 
-Usage: ruff check [OPTIONS] [FILES]...
+Usage: wruff check [OPTIONS] [FILES]...
 
 Arguments:
   [FILES]...  List of files or directories to check, or `-` to read from stdin
@@ -606,12 +630,12 @@ Options:
           Ignore any `# noqa` comments
       --output-format <OUTPUT_FORMAT>
           Output serialization format for violations. The default serialization
-          format is "full" [env: RUFF_OUTPUT_FORMAT=] [possible values:
+          format is "full" [env: WRUFF_OUTPUT_FORMAT=] [possible values:
           concise, full, json, json-lines, junit, grouped, github, gitlab,
           pylint, rdjson, azure, sarif]
   -o, --output-file <OUTPUT_FILE>
           Specify file to write the linter output to (default: stdout) [env:
-          RUFF_OUTPUT_FILE=]
+          WRUFF_OUTPUT_FILE=]
       --target-version <TARGET_VERSION>
           The minimum Python version that should be supported [possible values:
           py37, py38, py39, py310, py311, py312, py313, py314, py315]
@@ -673,9 +697,9 @@ File selection:
 
 Miscellaneous:
   -n, --no-cache
-          Disable cache reads [env: RUFF_NO_CACHE=]
+          Disable cache reads [env: WRUFF_NO_CACHE=]
       --cache-dir <CACHE_DIR>
-          Path to the cache directory [env: RUFF_CACHE_DIR=]
+          Path to the cache directory [env: WRUFF_CACHE_DIR=]
       --stdin-filename <STDIN_FILENAME>
           The name of the file when passing it through stdin
   -e, --exit-zero
@@ -692,12 +716,13 @@ Log levels:
 
 Global options:
       --config <CONFIG_OPTION>
-          Either a path to a TOML configuration file (`pyproject.toml` or
-          `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such as you might
-          find in a `ruff.toml` configuration file) overriding a specific
-          configuration option. Overrides of individual settings using this
-          option always take precedence over all configuration files, including
-          configuration files that were also specified using `--config`
+          Either a path to a TOML configuration file (`pyproject.toml`,
+          `wruff.toml`, or `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such
+          as you might find in a `wruff.toml` configuration file) overriding a
+          specific configuration option. Overrides of individual settings using
+          this option always take precedence over all configuration files,
+          including configuration files that were also specified using
+          `--config`
       --isolated
           Ignore all configuration files
       --color <WHEN>
@@ -714,7 +739,7 @@ Or `ruff help format` for more on the formatting command:
 ```text
 Run the Ruff formatter on the given files or directories
 
-Usage: ruff format [OPTIONS] [FILES]...
+Usage: wruff format [OPTIONS] [FILES]...
 
 Arguments:
   [FILES]...  List of files or directories to format, or `-` to read from stdin
@@ -740,17 +765,18 @@ Options:
           to disable
       --output-format <OUTPUT_FORMAT>
           Output serialization format for violations, when used with `--check`.
-          The default serialization format is "full" [env: RUFF_OUTPUT_FORMAT=]
-          [possible values: concise, full, json, json-lines, junit, grouped,
-          github, gitlab, pylint, rdjson, azure, sarif]
+          The default serialization format is "full" [env:
+          WRUFF_OUTPUT_FORMAT=] [possible values: concise, full, json,
+          json-lines, junit, grouped, github, gitlab, pylint, rdjson, azure,
+          sarif]
   -h, --help
           Print help (see more with '--help')
 
 Miscellaneous:
   -n, --no-cache
-          Disable cache reads [env: RUFF_NO_CACHE=]
+          Disable cache reads [env: WRUFF_NO_CACHE=]
       --cache-dir <CACHE_DIR>
-          Path to the cache directory [env: RUFF_CACHE_DIR=]
+          Path to the cache directory [env: WRUFF_CACHE_DIR=]
       --stdin-filename <STDIN_FILENAME>
           The name of the file when passing it through stdin
       --exit-non-zero-on-format
@@ -786,12 +812,13 @@ Log levels:
 
 Global options:
       --config <CONFIG_OPTION>
-          Either a path to a TOML configuration file (`pyproject.toml` or
-          `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such as you might
-          find in a `ruff.toml` configuration file) overriding a specific
-          configuration option. Overrides of individual settings using this
-          option always take precedence over all configuration files, including
-          configuration files that were also specified using `--config`
+          Either a path to a TOML configuration file (`pyproject.toml`,
+          `wruff.toml`, or `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such
+          as you might find in a `wruff.toml` configuration file) overriding a
+          specific configuration option. Overrides of individual settings using
+          this option always take precedence over all configuration files,
+          including configuration files that were also specified using
+          `--config`
       --isolated
           Ignore all configuration files
       --color <WHEN>

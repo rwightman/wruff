@@ -6,11 +6,11 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use crate::commands::completions::config::{OptionString, OptionStringParser};
-use anyhow::bail;
+use anyhow::{anyhow, bail};
 use clap::builder::Styles;
 use clap::builder::styling::{AnsiColor, Effects};
 use clap::builder::{TypedValueParser, ValueParserFactory};
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use colored::Colorize;
 use itertools::Itertools;
 use path_absolutize::path_dedot;
@@ -40,9 +40,9 @@ use toml;
 pub struct GlobalConfigArgs {
     #[clap(flatten)]
     log_level_args: LogLevelArgs,
-    /// Either a path to a TOML configuration file (`pyproject.toml` or `ruff.toml`),
+    /// Either a path to a TOML configuration file (`pyproject.toml`, `wruff.toml`, or `ruff.toml`),
     /// or a TOML `<KEY> = <VALUE>` pair
-    /// (such as you might find in a `ruff.toml` configuration file)
+    /// (such as you might find in a `wruff.toml` configuration file)
     /// overriding a specific configuration option.
     /// Overrides of individual settings using this option always take precedence
     /// over all configuration files, including configuration files that were also
@@ -63,7 +63,7 @@ pub struct GlobalConfigArgs {
     // as well as configuration files.
     // Specifying a configuration file conflicts with `--isolated`;
     // specifying a configuration override does not.
-    // If a user specifies `ruff check --isolated --config=ruff.toml`,
+    // If a user specifies `wruff check --isolated --config=wruff.toml`,
     // we emit an error later on, after the initial parsing by clap.
     #[arg(long, help_heading = "Global options", global = true)]
     pub isolated: bool,
@@ -113,9 +113,9 @@ const STYLES: Styles = Styles::styled()
 #[derive(Debug, Parser)]
 #[command(
     author,
-    name = "ruff",
-    about = "Ruff: An extremely fast Python linter and code formatter.",
-    after_help = "For help with a specific command, see: `ruff help <command>`."
+    name = "wruff",
+    about = "Wruff: An extremely fast Python linter and code formatter.",
+    after_help = "For help with a specific command, see: `wruff help <command>`."
 )]
 #[command(version)]
 #[command(styles = STYLES)]
@@ -269,11 +269,11 @@ pub struct CheckCommand {
 
     /// Output serialization format for violations.
     /// The default serialization format is "full".
-    #[arg(long, value_enum, env = "RUFF_OUTPUT_FORMAT")]
+    #[arg(long, value_enum, env = "WRUFF_OUTPUT_FORMAT")]
     pub output_format: Option<OutputFormat>,
 
     /// Specify file to write the linter output to (default: stdout).
-    #[arg(short, long, env = "RUFF_OUTPUT_FILE")]
+    #[arg(short, long, env = "WRUFF_OUTPUT_FILE")]
     pub output_file: Option<PathBuf>,
     /// The minimum Python version that should be supported.
     #[arg(long, value_enum)]
@@ -413,10 +413,10 @@ pub struct CheckCommand {
     #[arg(long, help_heading = "Rule configuration", hide = true)]
     pub dummy_variable_rgx: Option<Regex>,
     /// Disable cache reads.
-    #[arg(short, long, env = "RUFF_NO_CACHE", help_heading = "Miscellaneous")]
+    #[arg(short, long, env = "WRUFF_NO_CACHE", help_heading = "Miscellaneous")]
     pub no_cache: bool,
     /// Path to the cache directory.
-    #[arg(long, env = "RUFF_CACHE_DIR", help_heading = "Miscellaneous")]
+    #[arg(long, env = "WRUFF_CACHE_DIR", help_heading = "Miscellaneous")]
     pub cache_dir: Option<PathBuf>,
     /// The name of the file when passing it through stdin.
     #[arg(long, help_heading = "Miscellaneous")]
@@ -512,10 +512,10 @@ pub struct FormatCommand {
     pub diff: bool,
 
     /// Disable cache reads.
-    #[arg(short, long, env = "RUFF_NO_CACHE", help_heading = "Miscellaneous")]
+    #[arg(short, long, env = "WRUFF_NO_CACHE", help_heading = "Miscellaneous")]
     pub no_cache: bool,
     /// Path to the cache directory.
-    #[arg(long, env = "RUFF_CACHE_DIR", help_heading = "Miscellaneous")]
+    #[arg(long, env = "WRUFF_CACHE_DIR", help_heading = "Miscellaneous")]
     pub cache_dir: Option<PathBuf>,
 
     /// Respect file exclusions via `.gitignore` and other standard ignore files.
@@ -591,7 +591,7 @@ pub struct FormatCommand {
     ///
     /// Note that this option is currently only respected in preview mode. A warning will be emitted
     /// if this flag is used on stable.
-    #[arg(long, value_enum, env = "RUFF_OUTPUT_FORMAT")]
+    #[arg(long, value_enum, env = "WRUFF_OUTPUT_FORMAT")]
     pub output_format: Option<OutputFormat>,
 }
 
@@ -672,7 +672,7 @@ pub struct ConfigArguments {
     pub(crate) isolated: bool,
     /// The logging level to be used, derived from command-line arguments passed
     pub(crate) log_level: LogLevel,
-    /// Path to a pyproject.toml or ruff.toml configuration file (etc.).
+    /// Path to a pyproject.toml, wruff.toml, or ruff.toml configuration file (etc.).
     /// Either 0 or 1 configuration file paths may be provided on the command line.
     config_file: Option<PathBuf>,
     /// Overrides provided via the `--config "KEY=VALUE"` option.
@@ -916,7 +916,7 @@ impl InvalidConfigFlagReason {
         match self {
             Self::InvalidToml(_) => "The supplied argument is not valid TOML",
             Self::ValidTomlButInvalidRuffSchema(_) => {
-                "Could not parse the supplied argument as a `ruff.toml` configuration option"
+                "Could not parse the supplied argument as a configuration option"
             }
             Self::ExtendPassedViaConfigFlag => "Cannot include `extend` in a --config flag value",
         }
@@ -933,7 +933,7 @@ impl InvalidConfigFlagReason {
 /// For example:
 ///
 /// ```sh
-/// ruff check --config "path/to/ruff.toml" --config "extend-select=['E501', 'F841']" --config "lint.per-file-ignores = {'some_file.py' = ['F841']}"
+/// wruff check --config "path/to/wruff.toml" --config "extend-select=['E501', 'F841']" --config "lint.per-file-ignores = {'some_file.py' = ['F841']}"
 /// ```
 #[derive(Clone, Debug)]
 pub enum SingleConfigArgument {
@@ -1091,6 +1091,92 @@ Possible choices:
         );
 
         Err(new_error)
+    }
+}
+
+impl Args {
+    pub fn apply_public_aliases(mut self) -> anyhow::Result<Self> {
+        self.command.apply_public_aliases()?;
+        Ok(self)
+    }
+}
+
+impl Command {
+    fn apply_public_aliases(&mut self) -> anyhow::Result<()> {
+        match self {
+            Self::Check(command) => command.apply_public_aliases(),
+            Self::Format(command) => command.apply_public_aliases(),
+            _ => Ok(()),
+        }
+    }
+}
+
+impl CheckCommand {
+    fn apply_public_aliases(&mut self) -> anyhow::Result<()> {
+        if self.output_format.is_none() && !env_var_is_set("WRUFF_OUTPUT_FORMAT") {
+            self.output_format = legacy_output_format_env("RUFF_OUTPUT_FORMAT")?;
+        }
+        if self.output_file.is_none() && !env_var_is_set("WRUFF_OUTPUT_FILE") {
+            self.output_file = legacy_path_env("RUFF_OUTPUT_FILE");
+        }
+        if !self.no_cache && !env_var_is_set("WRUFF_NO_CACHE") {
+            self.no_cache = legacy_bool_env("RUFF_NO_CACHE")?.unwrap_or(false);
+        }
+        if self.cache_dir.is_none() && !env_var_is_set("WRUFF_CACHE_DIR") {
+            self.cache_dir = legacy_path_env("RUFF_CACHE_DIR");
+        }
+        Ok(())
+    }
+}
+
+impl FormatCommand {
+    fn apply_public_aliases(&mut self) -> anyhow::Result<()> {
+        if !self.no_cache && !env_var_is_set("WRUFF_NO_CACHE") {
+            self.no_cache = legacy_bool_env("RUFF_NO_CACHE")?.unwrap_or(false);
+        }
+        if self.cache_dir.is_none() && !env_var_is_set("WRUFF_CACHE_DIR") {
+            self.cache_dir = legacy_path_env("RUFF_CACHE_DIR");
+        }
+        if self.output_format.is_none() && !env_var_is_set("WRUFF_OUTPUT_FORMAT") {
+            self.output_format = legacy_output_format_env("RUFF_OUTPUT_FORMAT")?;
+        }
+        Ok(())
+    }
+}
+
+fn env_var_is_set(name: &str) -> bool {
+    std::env::var_os(name).is_some()
+}
+
+fn legacy_path_env(name: &str) -> Option<PathBuf> {
+    std::env::var_os(name).map(PathBuf::from)
+}
+
+fn legacy_bool_env(name: &str) -> anyhow::Result<Option<bool>> {
+    match std::env::var(name) {
+        Ok(value) => match value.as_str() {
+            "1" | "true" | "TRUE" | "True" => Ok(Some(true)),
+            "0" | "false" | "FALSE" | "False" => Ok(Some(false)),
+            _ => bail!(
+                "Failed to parse `{name}`: expected one of `true`, `false`, `1`, or `0`, got `{value}`"
+            ),
+        },
+        Err(std::env::VarError::NotPresent) => Ok(None),
+        Err(std::env::VarError::NotUnicode(_)) => {
+            bail!("Failed to parse `{name}`: value is not valid Unicode")
+        }
+    }
+}
+
+fn legacy_output_format_env(name: &str) -> anyhow::Result<Option<OutputFormat>> {
+    match std::env::var(name) {
+        Ok(value) => OutputFormat::from_str(&value, true)
+            .map(Some)
+            .map_err(|_| anyhow!("Failed to parse `{name}`: invalid output format `{value}`")),
+        Err(std::env::VarError::NotPresent) => Ok(None),
+        Err(std::env::VarError::NotUnicode(_)) => {
+            bail!("Failed to parse `{name}`: value is not valid Unicode")
+        }
     }
 }
 

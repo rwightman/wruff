@@ -2,7 +2,7 @@
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, anyhow};
 use log::debug;
 use pep440_rs::{Operator, Version, VersionSpecifiers};
 use serde::de::DeserializeOwned;
@@ -16,6 +16,19 @@ use crate::options::{Options, validate_required_version};
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 struct Tools {
     ruff: Option<Options>,
+    wruff: Option<Options>,
+}
+
+impl Tools {
+    fn into_options(self) -> Result<Option<Options>> {
+        match (self.wruff, self.ruff) {
+            (Some(_), Some(_)) => Err(anyhow!(
+                "Found both `[tool.wruff]` and `[tool.ruff]` in the same `pyproject.toml`; use only one"
+            )),
+            (Some(options), None) | (None, Some(options)) => Ok(Some(options)),
+            (None, None) => Ok(None),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -34,7 +47,8 @@ impl Pyproject {
     pub const fn new(options: Options) -> Self {
         Self {
             tool: Some(Tools {
-                ruff: Some(options),
+                ruff: None,
+                wruff: Some(options),
             }),
             project: None,
         }
@@ -72,19 +86,52 @@ fn parse_ruff_toml<P: AsRef<Path>>(path: P) -> Result<Options> {
 
 /// Parse a `pyproject.toml` file.
 fn parse_pyproject_toml<P: AsRef<Path>>(path: P) -> Result<Pyproject> {
-    parse_toml(path, &["tool", "ruff"])
+    let path = path.as_ref();
+    let contents = std::fs::read_to_string(path)
+        .with_context(|| format!("Failed to read {}", path.display()))?;
+
+    let root = toml::de::DeTable::parse(&contents)
+        .with_context(|| format!("Failed to parse {}", path.display()))?;
+
+    check_required_version(root.get_ref(), &["tool", "wruff"])?;
+    check_required_version(root.get_ref(), &["tool", "ruff"])?;
+
+    let deserializer = toml::de::Deserializer::from(root);
+    Pyproject::deserialize(deserializer)
+        .map_err(|mut err| {
+            err.set_input(Some(&contents));
+            err
+        })
+        .with_context(|| format!("Failed to parse {}", path.display()))
 }
 
-/// Return `true` if a `pyproject.toml` contains a `[tool.ruff]` section.
+/// Return `true` if a `pyproject.toml` contains a `[tool.wruff]` or `[tool.ruff]` section.
 pub fn ruff_enabled<P: AsRef<Path>>(path: P) -> Result<bool> {
     let pyproject = parse_pyproject_toml(path)?;
-    Ok(pyproject.tool.and_then(|tool| tool.ruff).is_some())
+    Ok(pyproject
+        .tool
+        .map(Tools::into_options)
+        .transpose()?
+        .flatten()
+        .is_some())
 }
 
-/// Return the path to the `pyproject.toml` or `ruff.toml` file in a given
+/// Return the path to the `pyproject.toml`, `wruff.toml`, or `ruff.toml` file in a given
 /// directory.
 pub fn settings_toml<P: AsRef<Path>>(path: P) -> Result<Option<PathBuf>> {
     let path = path.as_ref();
+    // Check for `.wruff.toml`.
+    let wruff_toml = path.join(".wruff.toml");
+    if wruff_toml.is_file() {
+        return Ok(Some(wruff_toml));
+    }
+
+    // Check for `wruff.toml`.
+    let wruff_toml = path.join("wruff.toml");
+    if wruff_toml.is_file() {
+        return Ok(Some(wruff_toml));
+    }
+
     // Check for `.ruff.toml`.
     let ruff_toml = path.join(".ruff.toml");
     if ruff_toml.is_file() {
@@ -106,7 +153,7 @@ pub fn settings_toml<P: AsRef<Path>>(path: P) -> Result<Option<PathBuf>> {
     Ok(None)
 }
 
-/// Find the path to the `pyproject.toml` or `ruff.toml` file, if such a file
+/// Find the path to the `pyproject.toml`, `wruff.toml`, or `ruff.toml` file, if such a file
 /// exists.
 pub fn find_settings_toml<P: AsRef<Path>>(path: P) -> Result<Option<PathBuf>> {
     for directory in path.as_ref().ancestors() {
@@ -155,20 +202,28 @@ pub fn find_fallback_target_version<P: AsRef<Path>>(path: P) -> Option<PythonVer
     None
 }
 
-/// Find the path to the user-specific `pyproject.toml` or `ruff.toml`, if it
+/// Find the path to the user-specific `pyproject.toml`, `wruff.toml`, or `ruff.toml`, if it
 /// exists.
 #[cfg(not(target_arch = "wasm32"))]
 pub fn find_user_settings_toml() -> Option<PathBuf> {
     use etcetera::BaseStrategy;
 
     let strategy = etcetera::base_strategy::choose_base_strategy().ok()?;
-    let config_dir = strategy.config_dir().join("ruff");
-
-    // Search for a user-specific `.ruff.toml`, then a `ruff.toml`, then a `pyproject.toml`.
-    for filename in [".ruff.toml", "ruff.toml", "pyproject.toml"] {
-        let path = config_dir.join(filename);
-        if path.is_file() {
-            return Some(path);
+    for (config_dir, filenames) in [
+        (
+            strategy.config_dir().join("wruff"),
+            [".wruff.toml", "wruff.toml", "pyproject.toml"],
+        ),
+        (
+            strategy.config_dir().join("ruff"),
+            [".ruff.toml", "ruff.toml", "pyproject.toml"],
+        ),
+    ] {
+        for filename in filenames {
+            let path = config_dir.join(filename);
+            if path.is_file() {
+                return Some(path);
+            }
         }
     }
 
@@ -180,17 +235,18 @@ pub fn find_user_settings_toml() -> Option<PathBuf> {
     None
 }
 
-/// Load `Options` from a `pyproject.toml` or `ruff.toml` file.
+/// Load `Options` from a `pyproject.toml`, `wruff.toml`, or `ruff.toml` file.
 pub(super) fn load_options<P: AsRef<Path>>(path: P) -> Result<Options> {
     let path = path.as_ref();
     if path.ends_with("pyproject.toml") {
-        let pyproject = parse_pyproject_toml(path)?;
-        let mut ruff = pyproject
-            .tool
-            .and_then(|tool| tool.ruff)
+        let Pyproject { tool, project } = parse_pyproject_toml(path)?;
+        let mut ruff = tool
+            .map(Tools::into_options)
+            .transpose()?
+            .flatten()
             .unwrap_or_default();
         if ruff.target_version.is_none() {
-            if let Some(project) = pyproject.project {
+            if let Some(project) = project {
                 if let Some(requires_python) = project.requires_python {
                     ruff.target_version = get_minimum_supported_version(&requires_python);
                 }
@@ -293,7 +349,13 @@ mod tests {
 [tool.black]
 ",
         )?;
-        assert_eq!(pyproject.tool, Some(Tools { ruff: None }));
+        assert_eq!(
+            pyproject.tool,
+            Some(Tools {
+                ruff: None,
+                wruff: None
+            })
+        );
 
         let pyproject: Pyproject = toml::from_str(
             r"
@@ -304,7 +366,22 @@ mod tests {
         assert_eq!(
             pyproject.tool,
             Some(Tools {
-                ruff: Some(Options::default())
+                ruff: Some(Options::default()),
+                wruff: None,
+            })
+        );
+
+        let pyproject: Pyproject = toml::from_str(
+            r"
+[tool.black]
+[tool.wruff]
+",
+        )?;
+        assert_eq!(
+            pyproject.tool,
+            Some(Tools {
+                ruff: None,
+                wruff: Some(Options::default()),
             })
         );
 
@@ -321,7 +398,8 @@ line-length = 79
                 ruff: Some(Options {
                     line_length: Some(LineLength::try_from(79).unwrap()),
                     ..Options::default()
-                })
+                }),
+                wruff: None,
             })
         );
 
@@ -338,7 +416,8 @@ exclude = ["foo.py"]
                 ruff: Some(Options {
                     exclude: Some(vec!["foo.py".to_string()]),
                     ..Options::default()
-                })
+                }),
+                wruff: None,
             })
         );
 
@@ -361,7 +440,8 @@ select = ["E501"]
                         ..LintOptions::default()
                     }),
                     ..Options::default()
-                })
+                }),
+                wruff: None,
             })
         );
 
@@ -386,7 +466,8 @@ ignore = ["E501"]
                         ..LintOptions::default()
                     }),
                     ..Options::default()
-                })
+                }),
+                wruff: None,
             })
         );
 
@@ -426,7 +507,8 @@ strict-checking = false
                         ..LintOptions::default()
                     }),
                     ..Options::default()
-                })
+                }),
+                wruff: None,
             })
         );
 
@@ -571,8 +653,8 @@ per-file-ignores = { "__init__.py" = ["F401"] }
         let config = pyproject
             .tool
             .context("Expected to find [tool] field")?
-            .ruff
-            .context("Expected to find [tool.ruff] field")?;
+            .into_options()?
+            .context("Expected to find a tool-specific Wruff configuration field")?;
         assert_eq!(
             config,
             Options {
@@ -595,6 +677,84 @@ per-file-ignores = { "__init__.py" = ["F401"] }
                 }),
                 ..Options::default()
             }
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn find_and_parse_wruff_pyproject_toml() -> Result<()> {
+        let tempdir = TempDir::new()?;
+        let pyproject = tempdir.path().join("pyproject.toml");
+        fs::write(
+            &pyproject,
+            r#"
+[tool.wruff]
+line-length = 99
+"#,
+        )?;
+
+        let settings =
+            find_settings_toml(tempdir.path())?.context("Failed to find pyproject.toml")?;
+        assert_eq!(settings, pyproject);
+
+        let pyproject = parse_pyproject_toml(settings)?;
+        let config = pyproject
+            .tool
+            .context("Expected to find [tool] field")?
+            .into_options()?
+            .context("Expected to find [tool.wruff] field")?;
+
+        assert_eq!(
+            config,
+            Options {
+                line_length: Some(LineLength::try_from(99).unwrap()),
+                ..Options::default()
+            }
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn settings_toml_prefers_wruff_files() -> Result<()> {
+        let tempdir = TempDir::new()?;
+        fs::write(tempdir.path().join("ruff.toml"), "line-length = 88")?;
+        fs::write(tempdir.path().join(".ruff.toml"), "line-length = 89")?;
+        fs::write(tempdir.path().join("wruff.toml"), "line-length = 90")?;
+        fs::write(tempdir.path().join(".wruff.toml"), "line-length = 91")?;
+
+        let settings =
+            find_settings_toml(tempdir.path())?.context("Failed to find settings file")?;
+        assert_eq!(settings, tempdir.path().join(".wruff.toml"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_mixed_ruff_and_wruff_pyproject_sections() -> Result<()> {
+        let tempdir = TempDir::new()?;
+        let pyproject = tempdir.path().join("pyproject.toml");
+        fs::write(
+            &pyproject,
+            r#"
+[tool.ruff]
+line-length = 88
+
+[tool.wruff]
+line-length = 99
+"#,
+        )?;
+
+        let err = parse_pyproject_toml(&pyproject)?
+            .tool
+            .context("Expected to find [tool] field")?
+            .into_options()
+            .expect_err("expected mixed tool sections to be rejected");
+
+        assert!(
+            err.to_string()
+                .contains("Found both `[tool.wruff]` and `[tool.ruff]`")
         );
 
         Ok(())

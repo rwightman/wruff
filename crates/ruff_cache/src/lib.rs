@@ -6,7 +6,7 @@ mod cache_key;
 pub mod filetime;
 pub mod globset;
 
-pub const CACHE_DIR_NAME: &str = ".ruff_cache";
+pub const CACHE_DIR_NAME: &str = ".wruff_cache";
 
 /// Return the cache directory for a given project root.
 pub fn cache_dir(project_root: &Path) -> PathBuf {

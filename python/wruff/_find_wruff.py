@@ -5,11 +5,11 @@ import sys
 import sysconfig
 
 
-class RuffNotFound(FileNotFoundError): ...
+class WruffNotFound(FileNotFoundError): ...
 
 
-def find_ruff_bin() -> str:
-    """Return the ruff binary path."""
+def find_wruff_bin() -> str:
+    """Return the wruff binary path."""
 
     targets = [
         # The scripts directory for the current Python
@@ -18,20 +18,20 @@ def find_ruff_bin() -> str:
         sysconfig.get_path("scripts", vars={"base": sys.base_prefix}),
         # Above the package root, e.g., from `pip install --prefix` or `uv run --with`
         (
-            # On Windows, with module path `<prefix>/Lib/site-packages/ruff`
+            # On Windows, with module path `<prefix>/Lib/site-packages/wruff`
             _join(
-                _matching_parents(_module_path(), "Lib/site-packages/ruff"), "Scripts"
+                _matching_parents(_module_path(), "Lib/site-packages/wruff"), "Scripts"
             )
             if sys.platform == "win32"
-            # On Unix,  with module path `<prefix>/lib/python3.13/site-packages/ruff`
+            # On Unix, with module path `<prefix>/lib/python3.13/site-packages/wruff`
             else _join(
-                _matching_parents(_module_path(), "lib/python*/site-packages/ruff"),
+                _matching_parents(_module_path(), "lib/python*/site-packages/wruff"),
                 "bin",
             )
         ),
         # Adjacent to the package root, e.g., from `pip install --target`
-        # with module path `<target>/ruff`
-        _join(_matching_parents(_module_path(), "ruff"), "bin"),
+        # with module path `<target>/wruff`
+        _join(_matching_parents(_module_path(), "wruff"), "bin"),
         # The user scheme scripts directory, e.g., `~/.local/bin`
         sysconfig.get_path("scripts", scheme=_user_scheme()),
     ]
@@ -43,34 +43,40 @@ def find_ruff_bin() -> str:
         if target in seen:
             continue
         seen.append(target)
+
         for executable in _executable_names():
             path = os.path.join(target, executable)
             if os.path.isfile(path):
                 return path
 
     locations = "\n".join(f" - {target}" for target in seen)
-    raise RuffNotFound(
-        f"Could not find the ruff binary in any of the following locations:\n{locations}\n"
+    raise WruffNotFound(
+        "Could not find the wruff binary in any of the following locations:\n"
+        f"{locations}\n"
     )
+
+
+def find_ruff_bin() -> str:
+    """Backward-compatible alias for callers expecting the old helper name."""
+
+    return find_wruff_bin()
 
 
 def _executable_names() -> tuple[str, str]:
     exe_suffix = sysconfig.get_config_var("EXE")
-    return (f"ruff{exe_suffix}", f"wruff{exe_suffix}")
+    return (f"wruff{exe_suffix}", f"ruff{exe_suffix}")
 
 
 def _module_path() -> str | None:
-    path = os.path.dirname(__file__)
-    return path
+    return os.path.dirname(__file__)
 
 
 def _matching_parents(path: str | None, match: str) -> str | None:
     """
     Return the parent directory of `path` after trimming a `match` from the end.
     The match is expected to contain `/` as a path separator, while the `path`
-    is expected to use the platform's path separator (e.g., `os.sep`). The path
-    components are compared case-insensitively and a `*` wildcard can be used
-    in the `match`.
+    is expected to use the platform's path separator. The path components are
+    compared case-insensitively and a `*` wildcard can be used in the `match`.
     """
     from fnmatch import fnmatch
 

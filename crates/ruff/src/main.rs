@@ -40,7 +40,10 @@ pub fn main() -> ExitCode {
         Err(err) => return report_error(&err),
     };
 
-    let args = Args::parse_from(args);
+    let args = match Args::parse_from(args).apply_public_aliases() {
+        Ok(args) => args,
+        Err(err) => return report_error(&err),
+    };
 
     match run(args) {
         Ok(code) => code.into(),
