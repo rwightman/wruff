@@ -1,5 +1,4 @@
 use std::io::Write;
-use std::path::Path;
 use std::process::ExitCode;
 
 use anyhow::Context;
@@ -70,19 +69,7 @@ fn report_error(err: &anyhow::Error) -> ExitCode {
 
         // This communicates that this isn't a linter error but ruff itself hard-errored for
         // some reason (e.g. failed to resolve the configuration)
-        let executable_name = std::env::args_os()
-            .next()
-            .as_deref()
-            .and_then(|path| Path::new(path).file_name())
-            .and_then(|name| name.to_str())
-            .unwrap_or("wruff")
-            .to_owned();
-        writeln!(
-            stderr,
-            "{}",
-            format!("{executable_name} failed").red().bold()
-        )
-        .ok();
+        writeln!(stderr, "{}", "wruff failed".red().bold()).ok();
         // Currently we generally only see one error, but e.g. with io errors when resolving
         // the configuration it is help to chain errors ("resolving configuration failed" ->
         // "failed to read file: subdir/pyproject.toml")

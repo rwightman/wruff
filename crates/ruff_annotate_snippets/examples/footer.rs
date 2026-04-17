@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use ruff_annotate_snippets::{Level, Renderer, Snippet};
 
 fn main() {
@@ -18,5 +20,6 @@ fn main() {
             ));
 
     let renderer = Renderer::styled();
-    anstream::println!("{}", renderer.render(message));
+    let mut stdout = anstream::AutoStream::always(std::io::stdout());
+    writeln!(stdout, "{}", renderer.render(message)).unwrap();
 }
