@@ -90,7 +90,7 @@ impl FormatNodeRule<Arguments> for FormatArguments {
         // )
         let comments = f.context().comments().clone();
         let dangling_comments = comments.dangling(item);
-        let hug_arguments = is_arguments_huggable(item, f)?;
+        let hug_arguments = is_arguments_huggable(item, f);
         write!(
             f,
             [
@@ -172,7 +172,7 @@ fn is_single_argument_parenthesized(argument: &Expr, call_end: TextSize, source:
 ///
 /// Hugging should only be applied to single-argument collections, like lists, or starred versions
 /// of those collections.
-fn is_arguments_huggable(arguments: &Arguments, f: &mut PyFormatter) -> FormatResult<bool> {
+fn is_arguments_huggable(arguments: &Arguments, f: &PyFormatter) -> bool {
     let context = f.context();
 
     // Find the lone argument or `**kwargs` keyword.
@@ -181,7 +181,7 @@ fn is_arguments_huggable(arguments: &Arguments, f: &mut PyFormatter) -> FormatRe
         ([], [keyword]) if keyword.arg.is_none() && !context.comments().has(keyword) => {
             &keyword.value
         }
-        _ => return Ok(false),
+        _ => return false,
     };
 
     // If the expression itself isn't huggable, then we can't hug it.
@@ -191,18 +191,18 @@ fn is_arguments_huggable(arguments: &Arguments, f: &mut PyFormatter) -> FormatRe
     {
         if matches!(arg, Expr::Call(_))
             && context.options().hug_nested_calls()
-            && is_nested_call_huggable(arg, f)?
+            && is_nested_call_huggable(arg, context)
         {
-            return Ok(true);
+            return true;
         }
 
-        return Ok(false);
+        return false;
     }
 
     // If the expression has leading or trailing comments, then we can't hug it.
     let comments = context.comments().leading_dangling_trailing(arg);
     if comments.has_leading() || comments.has_trailing() {
-        return Ok(false);
+        return false;
     }
 
     let options = context.options();
@@ -211,26 +211,24 @@ fn is_arguments_huggable(arguments: &Arguments, f: &mut PyFormatter) -> FormatRe
     if options.magic_trailing_comma().is_respect()
         && commas::has_magic_trailing_comma(TextRange::new(arg.end(), arguments.end()), context)
     {
-        return Ok(false);
+        return false;
     }
 
-    Ok(true)
+    true
 }
 
-fn is_nested_call_huggable(argument: &Expr, f: &mut PyFormatter) -> FormatResult<bool> {
+fn is_nested_call_huggable(argument: &Expr, context: &PyFormatContext) -> bool {
     let Expr::Call(call) = argument else {
-        return Ok(false);
+        return false;
     };
 
-    let context = f.context();
-
     if context.comments().has(call) {
-        return Ok(false);
+        return false;
     }
 
-    Ok(context
+    context
         .source()
-        .contains_line_break(TextRange::new(call.arguments.start(), call.arguments.end())))
+        .contains_line_break(TextRange::new(call.arguments.start(), call.arguments.end()))
 }
 
 /// Returns `true` if `string` is a multiline string that is not implicitly concatenated and there's no
