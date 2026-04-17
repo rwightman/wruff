@@ -6,9 +6,9 @@ resolver = "2"
 # Please update rustfmt.toml when bumping the Rust edition
 edition = "2024"
 rust-version = "1.92"
-homepage = "https://docs.astral.sh/ruff"
+homepage = "https://github.com/rwightman/wruff"
 documentation = "https://docs.astral.sh/ruff"
-repository = "https://github.com/astral-sh/ruff"
+repository = "https://github.com/rwightman/wruff"
 authors = ["Charlie Marsh <charlie.r.marsh@gmail.com>"]
 license = "MIT"
 

@@ -2,6 +2,8 @@
 
 # Wruff
 
+[**Repository**](https://github.com/rwightman/wruff) | [**Upstream Docs**](https://docs.astral.sh/ruff/)
+
 An extremely fast Python linter and code formatter, written in Rust.
 
 ## Wruff Fork
@@ -33,7 +35,9 @@ preserve-multiline = true
 ```
 
 The rest of this README still largely describes upstream Ruff and its broader capabilities. Wruff
-inherits that foundation and then layers its fork-specific defaults and options on top.
+inherits that foundation and then layers its fork-specific defaults and options on top. References
+to `docs.astral.sh/ruff` below point to the upstream documentation until Wruff has its own docs
+site.
 
 <p align="center">
   <picture align="center">
@@ -124,7 +128,7 @@ creator of [isort](https://github.com/PyCQA/isort):
 
 ## Table of Contents
 
-For more, see the [documentation](https://docs.astral.sh/ruff/).
+For more, see the [upstream Ruff documentation](https://docs.astral.sh/ruff/).
 
 1. [Getting Started](#getting-started)
 1. [Configuration](#configuration)
@@ -137,109 +141,88 @@ For more, see the [documentation](https://docs.astral.sh/ruff/).
 
 ## Getting Started<a id="getting-started"></a>
 
-For more, see the [documentation](https://docs.astral.sh/ruff/).
+For more, see the [upstream Ruff documentation](https://docs.astral.sh/ruff/).
 
 ### Installation
 
-Ruff is available as [`ruff`](https://pypi.org/project/ruff/) on PyPI.
+Wruff is invoked as `wruff`.
 
-Invoke Ruff directly with [`uvx`](https://docs.astral.sh/uv/):
-
-```shell
-uvx ruff check   # Lint all files in the current directory.
-uvx ruff format  # Format all files in the current directory.
-```
-
-Or install Ruff with `uv` (recommended), `pip`, or `pipx`:
+From a local checkout, run Wruff directly with Cargo:
 
 ```shell
-# With uv.
-uv tool install ruff@latest  # Install Ruff globally.
-uv add --dev ruff            # Or add Ruff to your project.
-
-# With pip.
-pip install ruff
-
-# With pipx.
-pipx install ruff
+cargo run --bin wruff -- check   # Lint all files in the current directory.
+cargo run --bin wruff -- format  # Format all files in the current directory.
 ```
 
-Starting with version `0.5.0`, Ruff can be installed with our standalone installers:
+Or build the binary once and run it directly:
 
 ```shell
-# On macOS and Linux.
-curl -LsSf https://astral.sh/ruff/install.sh | sh
-
-# On Windows.
-powershell -c "irm https://astral.sh/ruff/install.ps1 | iex"
-
-# For a specific version.
-curl -LsSf https://astral.sh/ruff/0.15.10/install.sh | sh
-powershell -c "irm https://astral.sh/ruff/0.15.10/install.ps1 | iex"
+cargo build --bin wruff
+./target/debug/wruff check
+./target/debug/wruff format
 ```
 
-You can also install Ruff via [Homebrew](https://formulae.brew.sh/formula/ruff), [Conda](https://anaconda.org/conda-forge/ruff),
-and with [a variety of other package managers](https://docs.astral.sh/ruff/installation/).
+You can also install the local checkout in editable mode:
+
+```shell
+pip install -e .
+wruff check
+wruff format
+```
+
+Wruff does not yet publish separate standalone installers or fork-specific package-manager
+integrations. For inherited behavior and configuration details, see the upstream Ruff docs.
 
 ### Usage
 
-To run Ruff as a linter, try any of the following:
+To run Wruff as a linter, try any of the following:
 
 ```shell
-ruff check                          # Lint all files in the current directory (and any subdirectories).
-ruff check path/to/code/            # Lint all files in `/path/to/code` (and any subdirectories).
-ruff check path/to/code/*.py        # Lint all `.py` files in `/path/to/code`.
-ruff check path/to/code/to/file.py  # Lint `file.py`.
-ruff check @arguments.txt           # Lint using an input file, treating its contents as newline-delimited command-line arguments.
+wruff check                          # Lint all files in the current directory (and any subdirectories).
+wruff check path/to/code/            # Lint all files in `/path/to/code` (and any subdirectories).
+wruff check path/to/code/*.py        # Lint all `.py` files in `/path/to/code`.
+wruff check path/to/code/to/file.py  # Lint `file.py`.
+wruff check @arguments.txt           # Lint using an input file, treating its contents as newline-delimited command-line arguments.
 ```
 
-Or, to run Ruff as a formatter:
+Or, to run Wruff as a formatter:
 
 ```shell
-ruff format                          # Format all files in the current directory (and any subdirectories).
-ruff format path/to/code/            # Format all files in `/path/to/code` (and any subdirectories).
-ruff format path/to/code/*.py        # Format all `.py` files in `/path/to/code`.
-ruff format path/to/code/to/file.py  # Format `file.py`.
-ruff format @arguments.txt           # Format using an input file, treating its contents as newline-delimited command-line arguments.
+wruff format                          # Format all files in the current directory (and any subdirectories).
+wruff format path/to/code/            # Format all files in `/path/to/code` (and any subdirectories).
+wruff format path/to/code/*.py        # Format all `.py` files in `/path/to/code`.
+wruff format path/to/code/to/file.py  # Format `file.py`.
+wruff format @arguments.txt           # Format using an input file, treating its contents as newline-delimited command-line arguments.
 ```
 
-Ruff can also be used as a [pre-commit](https://pre-commit.com/) hook via [`ruff-pre-commit`](https://github.com/astral-sh/ruff-pre-commit):
+Wruff can also be used as a [pre-commit](https://pre-commit.com/) hook via local hooks:
 
 ```yaml
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  # Ruff version.
-  rev: v0.15.10
+- repo: local
   hooks:
-    # Run the linter.
-    - id: ruff-check
-      args: [ --fix ]
-    # Run the formatter.
-    - id: ruff-format
+    - id: wruff-check
+      name: wruff check
+      entry: wruff check --fix
+      language: system
+      types_or: [python, pyi]
+    - id: wruff-format
+      name: wruff format
+      entry: wruff format
+      language: system
+      types_or: [python, pyi]
 ```
 
-Ruff can also be used as a [VS Code extension](https://github.com/astral-sh/ruff-vscode) or with [various other editors](https://docs.astral.sh/ruff/editors/setup).
-
-Ruff can also be used as a [GitHub Action](https://github.com/features/actions) via
-[`ruff-action`](https://github.com/astral-sh/ruff-action):
-
-```yaml
-name: Ruff
-on: [ push, pull_request ]
-jobs:
-  ruff:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/ruff-action@v3
-```
+Wruff does not yet publish fork-specific editor or GitHub Action integrations. The upstream Ruff
+ecosystem can still be a useful reference, but those integrations are not Wruff-specific.
 
 ### Configuration<a id="configuration"></a>
 
-Ruff can be configured through a `pyproject.toml`, `ruff.toml`, or `.ruff.toml` file (see:
+Wruff can be configured through a `pyproject.toml`, `wruff.toml`, `.wruff.toml`, `ruff.toml`, or
+`.ruff.toml` file (see:
 [_Configuration_](https://docs.astral.sh/ruff/configuration/), or [_Settings_](https://docs.astral.sh/ruff/settings/)
 for a complete list of all configuration options).
 
-If left unspecified, Ruff's default configuration is equivalent to the following `ruff.toml` file:
+If left unspecified, Wruff's default configuration is equivalent to the following `wruff.toml` file:
 
 ```toml
 # Exclude a variety of commonly ignored directories.
@@ -257,6 +240,7 @@ exclude = [
     ".pyenv",
     ".pytest_cache",
     ".pytype",
+    ".wruff_cache",
     ".ruff_cache",
     ".svn",
     ".tox",
@@ -272,8 +256,8 @@ exclude = [
     "venv",
 ]
 
-# Same as Black.
-line-length = 88
+# Wruff defaults to a wider line length.
+line-length = 120
 indent-width = 4
 
 # Assume Python 3.10
@@ -292,6 +276,15 @@ unfixable = []
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [format]
+# Wruff defaults to double-indented multiline function parameters.
+argument-indent = "double"
+
+# Wruff keeps compact spacing for common slice arithmetic and attributes.
+slice-spacing = "permissive"
+
+# Wruff preserves existing multiline joiners and parameter lists.
+preserve-multiline = true
+
 # Like Black, use double quotes for strings.
 quote-style = "double"
 
@@ -305,20 +298,21 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 ```
 
-Note that, in a `pyproject.toml`, each section header should be prefixed with `tool.ruff`. For
-example, `[lint]` should be replaced with `[tool.ruff.lint]`.
+Note that, in a `pyproject.toml`, each section header should be prefixed with `tool.wruff`. For
+example, `[lint]` should be replaced with `[tool.wruff.lint]`. For compatibility, Wruff also
+recognizes `tool.ruff`.
 
 Some configuration options can be provided via dedicated command-line arguments, such as those
 related to rule enablement and disablement, file discovery, and logging level:
 
 ```shell
-ruff check --select F401 --select F403 --quiet
+wruff check --select F401 --select F403 --quiet
 ```
 
 The remaining configuration options can be provided through a catch-all `--config` argument:
 
 ```shell
-ruff check --config "lint.per-file-ignores = {'some_file.py' = ['F841']}"
+wruff check --config "lint.per-file-ignores = {'some_file.py' = ['F841']}"
 ```
 
 To opt in to the latest lint rules, formatter style changes, interface updates, and more, enable
@@ -326,7 +320,7 @@ To opt in to the latest lint rules, formatter style changes, interface updates, 
 file or passing `--preview` on the command line. Preview mode enables a collection of unstable
 features that may change prior to stabilization.
 
-See `ruff help` for more on Ruff's top-level commands, or `ruff help check` and `ruff help format`
+See `wruff help` for more on Wruff's top-level commands, or `wruff help check` and `wruff help format`
 for more on the linting and formatting commands, respectively.
 
 ## Rules<a id="rules"></a>
@@ -338,7 +332,7 @@ isort, pyupgrade, and others. Regardless of the rule's origin, Ruff re-implement
 Rust as a first-party feature.
 
 By default, Ruff enables Flake8's `F` rules, along with a subset of the `E` rules, omitting any
-stylistic rules that overlap with the use of a formatter, like `ruff format` or
+stylistic rules that overlap with the use of a formatter, like `wruff format` or
 [Black](https://github.com/psf/black).
 
 If you're just getting started with Ruff, **the default rule set is a great place to start**: it
@@ -420,10 +414,11 @@ You can also join us on [**Discord**](https://discord.com/invite/astral-sh).
 
 ## Support<a id="support"></a>
 
-Having trouble? Check out the existing issues on [**GitHub**](https://github.com/astral-sh/ruff/issues),
-or feel free to [**open a new one**](https://github.com/astral-sh/ruff/issues/new).
+Having trouble? Check out the existing issues on [**GitHub**](https://github.com/rwightman/wruff/issues),
+or feel free to [**open a new one**](https://github.com/rwightman/wruff/issues/new).
 
-You can also ask for help on [**Discord**](https://discord.com/invite/astral-sh).
+For behavior inherited from Ruff, the upstream documentation at [docs.astral.sh/ruff](https://docs.astral.sh/ruff/)
+is still the best reference.
 
 ## Acknowledgements<a id="acknowledgements"></a>
 
@@ -445,7 +440,7 @@ Ruff's import resolver is based on the import resolution algorithm from [Pyright
 Ruff is also influenced by a number of tools outside the Python ecosystem, like
 [Clippy](https://github.com/rust-lang/rust-clippy) and [ESLint](https://github.com/eslint/eslint).
 
-Ruff is the beneficiary of a large number of [contributors](https://github.com/astral-sh/ruff/graphs/contributors).
+Wruff builds on Ruff, which is the beneficiary of a large number of [contributors](https://github.com/astral-sh/ruff/graphs/contributors).
 
 Ruff is released under the MIT license.
 
@@ -554,32 +549,26 @@ Ruff is used by a number of major open-source projects and companies, including:
 
 ### Show Your Support
 
-If you're using Ruff, consider adding the Ruff badge to your project's `README.md`:
+If you're using Wruff, consider adding the Wruff badge to your project's `README.md`:
 
 ```md
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Wruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/rwightman/wruff/main/assets/badge/v2.json)](https://github.com/rwightman/wruff)
 ```
 
 ...or `README.rst`:
 
 ```rst
-.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
-    :target: https://github.com/astral-sh/ruff
-    :alt: Ruff
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/rwightman/wruff/main/assets/badge/v2.json
+    :target: https://github.com/rwightman/wruff
+    :alt: Wruff
 ```
 
 ...or, as HTML:
 
 ```html
-<a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff" style="max-width:100%;"></a>
+<a href="https://github.com/rwightman/wruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/rwightman/wruff/main/assets/badge/v2.json" alt="Wruff" style="max-width:100%;"></a>
 ```
 
 ## License<a id="license"></a>
 
-This repository is licensed under the [MIT License](https://github.com/astral-sh/ruff/blob/main/LICENSE)
-
-<div align="center">
-  <a target="_blank" href="https://astral.sh" style="background:none">
-    <img src="https://raw.githubusercontent.com/astral-sh/ruff/main/assets/svg/Astral.svg" alt="Made by Astral">
-  </a>
-</div>
+This repository is licensed under the [MIT License](LICENSE).
