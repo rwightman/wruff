@@ -300,8 +300,13 @@ pub trait WritableSystem: System {
         // Note that `create_new_file` will fail if the file has already been created. This
         // ensures that only one thread/process ever attempts to write to it to avoid corrupting
         // the cache.
-        self.create_new_file(&cache_path)?;
-        self.write_file(&cache_path, &contents)?;
+        match self.create_new_file(&cache_path) {
+            Ok(()) => {
+                self.write_file(&cache_path, &contents)?;
+            }
+            Err(err) if err.kind() == std::io::ErrorKind::AlreadyExists => {}
+            Err(err) => return Err(err),
+        }
 
         Ok(Some(cache_path))
     }

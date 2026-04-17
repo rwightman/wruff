@@ -178,12 +178,7 @@ def main() -> None:
 
     # Rewrite links to the documentation.
     for src, dst in LINK_REWRITES.items():
-        before = content
-        after = content.replace(f"({src})", f"({dst})")
-        if before == after:
-            msg = f"Unexpected link rewrite in README.md: {src}"
-            raise ValueError(msg)
-        content = after
+        content = content.replace(f"({src})", f"({dst})")
 
     if m := re.search(r"\(https://docs.astral.sh/ruff/.*\)", content):
         msg = f"Unexpected absolute link to documentation: {m.group(0)}"

@@ -118,6 +118,6 @@ expression: env.render_diagnostics(&diagnostics)
   "severity": "WARNING",
   "source": {
     "name": "ruff",
-    "url": "https://docs.astral.sh/ruff"
+    "url": "https://github.com/rwightman/wruff"
   }
 }

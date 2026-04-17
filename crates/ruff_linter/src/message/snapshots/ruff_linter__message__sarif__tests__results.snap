@@ -134,7 +134,7 @@ expression: value
               "help": {
                 "text": "`{name}` imported but unused; consider using `importlib.util.find_spec` to test for availability"
               },
-              "helpUri": "https://docs.astral.sh/ruff/rules/unused-import",
+              "helpUri": "https://github.com/rwightman/wruff/rules/unused-import",
               "id": "F401",
               "properties": {
                 "id": "F401",
@@ -153,7 +153,7 @@ expression: value
               "help": {
                 "text": "Undefined name `{name}`. {tip}"
               },
-              "helpUri": "https://docs.astral.sh/ruff/rules/undefined-name",
+              "helpUri": "https://github.com/rwightman/wruff/rules/undefined-name",
               "id": "F821",
               "properties": {
                 "id": "F821",
@@ -172,7 +172,7 @@ expression: value
               "help": {
                 "text": "Local variable `{name}` is assigned to but never used"
               },
-              "helpUri": "https://docs.astral.sh/ruff/rules/unused-variable",
+              "helpUri": "https://github.com/rwightman/wruff/rules/unused-variable",
               "id": "F841",
               "properties": {
                 "id": "F841",

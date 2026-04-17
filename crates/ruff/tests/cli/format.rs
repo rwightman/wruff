@@ -28,8 +28,8 @@ if condition:
     exit_code: 0
     ----- stdout -----
     def foo(
-        arg1,
-        arg2,
+            arg1,
+            arg2,
     ):
         print("Shouldn't change quotes")
 
@@ -634,8 +634,8 @@ fn output_format_notebook() -> Result<()> {
     2  +
     3  +
     4  + def some_function(
-    5  +     foo,
-    6  +     bar,
+    5  +         foo,
+    6  +         bar,
     7  + ):
     8  |     # Another cell with IPython escape command
     9  |     foo = %pwd
@@ -943,8 +943,8 @@ if condition:
     exit_code: 0
     ----- stdout -----
     def foo(
-    	arg1,
-    	arg2,
+    		arg1,
+    		arg2,
     ):
     	print("Shouldn't change quotes")
 
@@ -1314,8 +1314,8 @@ fn test_diff() -> Result<()> {
     +
     +
     +def some_function(
-    +    foo,
-    +    bar,
+    +        foo,
+    +        bar,
     +):
          # Another cell with IPython escape command
          foo = %pwd
@@ -1997,8 +1997,8 @@ def foo(arg1, arg2,):
     ----- stdout -----
 
     def foo(
-        arg1,
-        arg2,
+            arg1,
+            arg2,
     ):
         print("Shouldn't format this" )
 
@@ -2130,8 +2130,8 @@ def foo(arg1, arg2,):
     ----- stdout -----
 
     def foo(
-        arg1,
-        arg2,
+            arg1,
+            arg2,
     ):
         print("Shouldn't format this" )
 
@@ -2179,8 +2179,8 @@ def foo(arg1, arg2,):
     exit_code: 0
     ----- stdout -----
     def foo(
-        arg1,
-        arg2,
+            arg1,
+            arg2,
     ):
         print("Should format this" )
 
@@ -2326,7 +2326,7 @@ fn per_file_target_version_formatter() -> Result<()> {
     let test = CliTest::new()?;
     // without `per-file-target-version` this should not be reformatted in the same way
     assert_cmd_snapshot!(test.format_command()
-        .args(["--isolated", "--stdin-filename", "test.py", "--target-version=py38"])
+        .args(["--isolated", "--stdin-filename", "test.py", "--target-version=py38", "--line-length=88"])
         .arg("-")
         .pass_stdin(r#"
 with open("a_really_long_foo") as foo, open("a_really_long_bar") as bar, open("a_really_long_baz") as baz:
@@ -2345,7 +2345,7 @@ with open("a_really_long_foo") as foo, open("a_really_long_bar") as bar, open("a
 
     assert_cmd_snapshot!(test.format_command()
         .arg("--isolated")
-        .args(["--stdin-filename", "test.py", "--target-version=py38"])
+        .args(["--stdin-filename", "test.py", "--target-version=py38", "--line-length=88"])
         .args(["--config", r#"per-file-target-version = {"test.py" = "py311"}"#])
         .arg("-")
         .pass_stdin(r#"
