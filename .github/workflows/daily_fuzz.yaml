@@ -55,8 +55,8 @@ jobs:
             --project=./python/py-fuzzer \
             --locked \
             fuzz \
-            --test-executable=target/debug/ruff \
-            --bin=ruff \
+            --test-executable=target/debug/wruff \
+            --bin=wruff \
             $(shuf -i 0-9999999999999999999 -n 1000)
           )
 

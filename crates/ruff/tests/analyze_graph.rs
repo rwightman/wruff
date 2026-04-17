@@ -13,7 +13,7 @@ use insta_cmd::{assert_cmd_snapshot, get_cargo_bin};
 use tempfile::TempDir;
 
 fn command() -> Command {
-    let mut command = Command::new(get_cargo_bin("ruff"));
+    let mut command = Command::new(get_cargo_bin("wruff"));
     command.arg("analyze");
     command.arg("graph");
     command.arg("--preview");
@@ -950,7 +950,7 @@ fn venv() -> Result<()> {
         ----- stdout -----
 
         ----- stderr -----
-        ruff failed
+        wruff failed
           Cause: Invalid `--python` argument `none`: does not point to a Python executable or a directory on disk
           Cause: No such file or directory (os error 2)
         ");

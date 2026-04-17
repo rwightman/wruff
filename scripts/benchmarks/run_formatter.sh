@@ -26,8 +26,8 @@ TARGET_DIR=${1}
 
 # Benchmark 1: Write to disk.
 hyperfine --ignore-failure \
-  --prepare "./target/release/ruff format ${TARGET_DIR}" \
-  "./target/release/ruff format ${TARGET_DIR}" \
+  --prepare "./target/release/wruff format ${TARGET_DIR}" \
+  "./target/release/wruff format ${TARGET_DIR}" \
   --prepare "BLACK_CACHE_DIR=/dev/null black ${TARGET_DIR} --safe" \
   "BLACK_CACHE_DIR=/dev/null black ${TARGET_DIR} --safe" \
   --prepare "BLACK_CACHE_DIR=/dev/null black ${TARGET_DIR} --fast" \
@@ -43,8 +43,8 @@ hyperfine --ignore-failure \
 
 # Benchmark 2: Write to disk, but only use one thread.
 hyperfine --ignore-failure \
-  --prepare "./target/release/ruff format ${TARGET_DIR}" \
-  "RAYON_NUM_THREADS=1 ./target/release/ruff format ${TARGET_DIR}" \
+  --prepare "./target/release/wruff format ${TARGET_DIR}" \
+  "RAYON_NUM_THREADS=1 ./target/release/wruff format ${TARGET_DIR}" \
   --prepare "BLACK_CACHE_DIR=/dev/null black ${TARGET_DIR} --safe" \
   "BLACK_CACHE_DIR=/dev/null black ${TARGET_DIR} --workers=1 --safe" \
   --prepare "BLACK_CACHE_DIR=/dev/null black ${TARGET_DIR} --fast" \
@@ -60,8 +60,8 @@ hyperfine --ignore-failure \
 
 # Benchmark 3: Check formatting, but don't write to disk.
 hyperfine --ignore-failure \
-  --prepare "./target/release/ruff format ${TARGET_DIR}" \
-  "./target/release/ruff format ${TARGET_DIR} --check" \
+  --prepare "./target/release/wruff format ${TARGET_DIR}" \
+  "./target/release/wruff format ${TARGET_DIR} --check" \
   --prepare "BLACK_CACHE_DIR=/dev/null black ${TARGET_DIR} --safe" \
   "BLACK_CACHE_DIR=/dev/null black ${TARGET_DIR} --check --safe" \
   --prepare "BLACK_CACHE_DIR=/dev/null black ${TARGET_DIR} --fast" \

@@ -19,7 +19,7 @@
 # ```
 # You can customize this, e.g. cache the git checkouts, a custom json file and a glibc build:
 # ```
-# docker run -v ./target/debug/ruff:/app/ruff-new -v ./ruff-old:/app/ruff-old -v ./target/checkouts:/app/checkouts \
+# docker run -v ./target/debug/wruff:/app/ruff-new -v ./ruff-old:/app/ruff-old -v ./target/checkouts:/app/checkouts \
 #   -v ./github_search.jsonl:/app/github_search.jsonl --rm ruff-ecosystem-checker \
 #   python check_ecosystem.py --verbose ruff-new ruff-old --projects github_search.jsonl --checkouts checkouts  \
 #   > target/ecosystem-ci.txt

@@ -2,6 +2,7 @@
 name = "ruff"
 version = "0.15.10"
 publish = true
+autobins = false
 authors = { workspace = true }
 edition = { workspace = true }
 rust-version = { workspace = true }

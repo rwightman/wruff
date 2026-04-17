@@ -21,7 +21,7 @@ mod lint;
 mod show_settings;
 mod version;
 
-const BIN_NAME: &str = "ruff";
+const BIN_NAME: &str = "wruff";
 
 /// Creates a regex filter for replacing temporary directory paths in snapshots
 pub(crate) fn tempdir_filter(path: impl AsRef<str>) -> String {
