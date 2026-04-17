@@ -26,6 +26,8 @@ pub struct TestSystem {
     /// Environment variable overrides. If a key is present here, it takes precedence
     /// over the inner system's environment variables.
     env_overrides: Arc<Mutex<FxHashMap<String, Option<String>>>>,
+    user_config_directory_override: Arc<Mutex<Option<Option<SystemPathBuf>>>>,
+    cache_dir_override: Arc<Mutex<Option<Option<SystemPathBuf>>>>,
 }
 
 impl Clone for TestSystem {
@@ -33,6 +35,8 @@ impl Clone for TestSystem {
         Self {
             inner: self.inner.clone(),
             env_overrides: self.env_overrides.clone(),
+            user_config_directory_override: self.user_config_directory_override.clone(),
+            cache_dir_override: self.cache_dir_override.clone(),
         }
     }
 }
@@ -42,6 +46,8 @@ impl TestSystem {
         Self {
             inner: Arc::new(inner),
             env_overrides: Arc::new(Mutex::new(FxHashMap::default())),
+            user_config_directory_override: Arc::new(Mutex::new(None)),
+            cache_dir_override: Arc::new(Mutex::new(None)),
         }
     }
 
@@ -56,6 +62,16 @@ impl TestSystem {
     /// Removes an environment variable override, making it appear as not set.
     pub fn remove_env_var(&self, name: impl Into<String>) {
         self.env_overrides.lock().unwrap().insert(name.into(), None);
+    }
+
+    /// Overrides the user configuration directory seen through this test system.
+    pub fn set_user_config_directory(&self, directory: Option<SystemPathBuf>) {
+        *self.user_config_directory_override.lock().unwrap() = Some(directory);
+    }
+
+    /// Overrides the cache directory seen through this test system.
+    pub fn set_cache_dir(&self, directory: Option<SystemPathBuf>) {
+        *self.cache_dir_override.lock().unwrap() = Some(directory);
     }
 
     /// Returns the [`InMemorySystem`].
@@ -125,10 +141,18 @@ impl System for TestSystem {
     }
 
     fn user_config_directory(&self) -> Option<SystemPathBuf> {
+        if let Some(directory_override) =
+            self.user_config_directory_override.lock().unwrap().clone()
+        {
+            return directory_override;
+        }
         self.system().user_config_directory()
     }
 
     fn cache_dir(&self) -> Option<SystemPathBuf> {
+        if let Some(directory_override) = self.cache_dir_override.lock().unwrap().clone() {
+            return directory_override;
+        }
         self.system().cache_dir()
     }
 

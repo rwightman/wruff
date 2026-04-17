@@ -773,7 +773,7 @@ fn valid_toml_but_nonexistent_option_provided_via_config_argument() {
            or a TOML `<KEY> = <VALUE>` pair overriding a specific configuration
            option
 
-    Could not parse the supplied argument as a `ruff.toml` configuration option:
+    Could not parse the supplied argument as a configuration option:
 
     Unknown rule selector: `F481`
 

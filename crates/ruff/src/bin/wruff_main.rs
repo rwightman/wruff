@@ -28,7 +28,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
-pub(crate) fn main() -> ExitCode {
+pub(super) fn main() -> ExitCode {
     // Enabled ANSI colors on Windows 10.
     #[cfg(windows)]
     assert!(colored::control::set_virtual_terminal(true).is_ok());
@@ -58,10 +58,10 @@ fn report_error(err: &anyhow::Error) -> ExitCode {
         //
         // See: https://github.com/BurntSushi/ripgrep/blob/bf63fe8f258afc09bae6caa48f0ae35eaf115005/crates/core/main.rs#L47C1-L61C14
         for cause in err.chain() {
-            if let Some(ioerr) = cause.downcast_ref::<std::io::Error>() {
-                if ioerr.kind() == std::io::ErrorKind::BrokenPipe {
-                    return ExitCode::from(0);
-                }
+            if let Some(ioerr) = cause.downcast_ref::<std::io::Error>()
+                && ioerr.kind() == std::io::ErrorKind::BrokenPipe
+            {
+                return ExitCode::from(0);
             }
         }
 

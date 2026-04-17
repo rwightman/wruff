@@ -1,7 +1,7 @@
 ---
 source: crates/ruff/tests/integration_test.rs
 info:
-  program: ruff
+  program: wruff
   args:
     - check
     - "--output-format"
@@ -49,7 +49,7 @@ exit_code: 1
     "message": "`os` imported but unused",
     "noqa_row": 1,
     "severity": "error",
-    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+    "url": "https://github.com/rwightman/wruff/rules/unused-import"
   }
 ]
 ----- stderr -----

@@ -1,7 +1,7 @@
 ---
 source: crates/ruff/tests/cli/lint.rs
 info:
-  program: ruff
+  program: wruff
   args:
     - check
     - "--no-cache"
@@ -124,7 +124,7 @@ exit_code: 1
               "help": {
                 "text": "`{name}` imported but unused; consider using `importlib.util.find_spec` to test for availability"
               },
-              "helpUri": "https://docs.astral.sh/ruff/rules/unused-import",
+              "helpUri": "https://github.com/rwightman/wruff/rules/unused-import",
               "id": "F401",
               "properties": {
                 "id": "F401",
@@ -143,7 +143,7 @@ exit_code: 1
               "help": {
                 "text": "Undefined name `{name}`. {tip}"
               },
-              "helpUri": "https://docs.astral.sh/ruff/rules/undefined-name",
+              "helpUri": "https://github.com/rwightman/wruff/rules/undefined-name",
               "id": "F821",
               "properties": {
                 "id": "F821",

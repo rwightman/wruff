@@ -228,6 +228,8 @@ impl TestServer {
 
         // Create test system and set environment variable overrides
         let test_system = Arc::new(TestSystem::new(os_system));
+        test_system.set_cache_dir(Some(test_context.root().join(".cache")));
+        test_system.set_user_config_directory(Some(test_context.root().join(".config")));
         for (name, value) in env_vars {
             match value {
                 Some(value) => {
@@ -1204,6 +1206,9 @@ impl TestServerBuilder {
                 ("HOME".into(), None),
                 ("PATH".into(), None),
                 ("VIRTUAL_ENV".into(), None),
+                ("CONDA_PREFIX".into(), None),
+                ("CONDA_DEFAULT_ENV".into(), None),
+                ("CONDA_ROOT".into(), None),
             ],
         })
     }

@@ -920,8 +920,9 @@ jobs:
         run: |
           # Setup development binary
           pip uninstall --yes ruff
-          export PATH="${PWD}/target/debug:${PATH}"
-          ln -sf "${PWD}/target/debug/wruff" "${PWD}/target/debug/ruff"
+          mkdir -p "${PWD}/target/ruff-lsp-bin"
+          ln -sf "${PWD}/target/debug/wruff" "${PWD}/target/ruff-lsp-bin/ruff"
+          export PATH="${PWD}/target/ruff-lsp-bin:${PATH}"
           ruff version
 
           cd ruff-lsp
