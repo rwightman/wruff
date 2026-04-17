@@ -201,6 +201,7 @@ pub struct FormatterSettings {
     pub indent_style: IndentStyle,
     pub argument_indent: ArgumentIndent,
     pub preserve_multiline: bool,
+    pub hug_nested_calls: bool,
     pub indent_width: IndentWidth,
 
     pub quote_style: QuoteStyle,
@@ -252,6 +253,7 @@ impl FormatterSettings {
             .with_indent_style(self.indent_style)
             .with_argument_indent(self.argument_indent)
             .with_preserve_multiline(self.preserve_multiline)
+            .with_hug_nested_calls(self.hug_nested_calls)
             .with_indent_width(self.indent_width)
             .with_quote_style(self.quote_style)
             .with_nested_string_quote_style(self.nested_string_quote_style)
@@ -291,6 +293,7 @@ impl Default for FormatterSettings {
             indent_style: default_options.indent_style(),
             argument_indent: ArgumentIndent::Double,
             preserve_multiline: true,
+            hug_nested_calls: false,
             indent_width: default_options.indent_width(),
             quote_style: default_options.quote_style(),
             nested_string_quote_style: default_options.nested_string_quote_style(),
@@ -318,6 +321,7 @@ impl fmt::Display for FormatterSettings {
                 self.indent_style,
                 self.argument_indent,
                 self.preserve_multiline,
+                self.hug_nested_calls,
                 self.indent_width,
                 self.quote_style,
                 self.nested_string_quote_style,

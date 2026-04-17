@@ -1,0 +1,11 @@
+[
+  {
+    "line_width": 50,
+    "preview": "enabled"
+  },
+  {
+    "line_width": 50,
+    "preview": "enabled",
+    "hug_nested_calls": true
+  }
+]

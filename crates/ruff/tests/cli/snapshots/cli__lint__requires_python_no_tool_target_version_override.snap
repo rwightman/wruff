@@ -281,6 +281,7 @@ formatter.line_ending = auto
 formatter.indent_style = space
 formatter.argument_indent = double
 formatter.preserve_multiline = true
+formatter.hug_nested_calls = false
 formatter.indent_width = 4
 formatter.quote_style = double
 formatter.nested_string_quote_style = alternating

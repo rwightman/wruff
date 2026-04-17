@@ -3917,6 +3917,44 @@ pub struct FormatOptions {
     )]
     pub preserve_multiline: Option<bool>,
 
+    /// Keep a single nested call argument on the outer call line when the nested call already
+    /// spans multiple lines.
+    ///
+    /// `hug-nested-calls = true` formats:
+    ///
+    /// ```python
+    /// outer(inner(
+    ///     a,
+    ///     b,
+    /// ))
+    /// ```
+    ///
+    /// as:
+    ///
+    /// ```python
+    /// outer(inner(
+    ///     a,
+    ///     b,
+    /// ))
+    /// ```
+    ///
+    /// instead of:
+    ///
+    /// ```python
+    /// outer(
+    ///     inner(
+    ///         a,
+    ///         b,
+    ///     )
+    /// )
+    /// ```
+    #[option(
+        default = r#"false"#,
+        value_type = r#"bool"#,
+        example = "hug-nested-calls = true"
+    )]
+    pub hug_nested_calls: Option<bool>,
+
     /// The character Ruff uses at the end of a line.
     ///
     /// * `auto`: The newline style is detected automatically on a file per file basis. Files with mixed line endings will be converted to the first detected line ending. Defaults to `\n` for files that contain no line endings.

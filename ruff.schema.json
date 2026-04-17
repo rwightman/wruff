@@ -1609,6 +1609,13 @@
             "type": "string"
           }
         },
+        "hug-nested-calls": {
+          "description": "Keep a single nested call argument on the outer call line when the nested call already\nspans multiple lines.\n\n`hug-nested-calls = true` formats:\n\n```python\nouter(inner(\n    a,\n    b,\n))\n```\n\nas:\n\n```python\nouter(inner(\n    a,\n    b,\n))\n```\n\ninstead of:\n\n```python\nouter(\n    inner(\n        a,\n        b,\n    )\n)\n```",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
         "indent-style": {
           "description": "Whether to use spaces or tabs for indentation.\n\n`indent-style = \"space\"` (default):\n\n```python\ndef f():\n    print(\"Hello\") #  Spaces indent the `print` statement.\n```\n\n`indent-style = \"tab\"`:\n\n```python\ndef f():\n    print(\"Hello\") #  A tab `\\t` indents the `print` statement.\n```\n\nPEP 8 recommends using spaces for [indentation](https://peps.python.org/pep-0008/#indentation).\nWe care about accessibility; if you do not need tabs for accessibility, we do not recommend you use them.\n\nSee [`indent-width`](#indent-width) to configure the number of spaces per indentation and the tab width.",
           "anyOf": [
