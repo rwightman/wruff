@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::path::Path;
 use std::process::ExitCode;
 
 use anyhow::Context;
@@ -27,7 +28,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
-pub fn main() -> ExitCode {
+pub(crate) fn main() -> ExitCode {
     // Enabled ANSI colors on Windows 10.
     #[cfg(windows)]
     assert!(colored::control::set_virtual_terminal(true).is_ok());
@@ -69,7 +70,19 @@ fn report_error(err: &anyhow::Error) -> ExitCode {
 
         // This communicates that this isn't a linter error but ruff itself hard-errored for
         // some reason (e.g. failed to resolve the configuration)
-        writeln!(stderr, "{}", "ruff failed".red().bold()).ok();
+        let executable_name = std::env::args_os()
+            .next()
+            .as_deref()
+            .and_then(|path| Path::new(path).file_name())
+            .and_then(|name| name.to_str())
+            .unwrap_or("wruff")
+            .to_owned();
+        writeln!(
+            stderr,
+            "{}",
+            format!("{executable_name} failed").red().bold()
+        )
+        .ok();
         // Currently we generally only see one error, but e.g. with io errors when resolving
         // the configuration it is help to chain errors ("resolving configuration failed" ->
         // "failed to read file: subdir/pyproject.toml")

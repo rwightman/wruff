@@ -5,7 +5,7 @@ use std::process::Command;
 use std::str;
 
 use insta_cmd::{assert_cmd_snapshot, get_cargo_bin};
-const BIN_NAME: &str = "ruff";
+const BIN_NAME: &str = "wruff";
 
 #[cfg(not(target_os = "windows"))]
 const TEST_FILTERS: &[(&str, &str)] = &[(".*/resources/test/fixtures/", "[BASEPATH]/")];

@@ -5,7 +5,7 @@
 ###
 
 hyperfine --ignore-failure --warmup 2 --runs 5\
-  "./target/release/ruff check ./crates/ruff_linter/resources/test/cpython/ --no-cache --exit-zero" \
+  "./target/release/wruff check ./crates/ruff_linter/resources/test/cpython/ --no-cache --exit-zero" \
   "pyflakes crates/ruff_linter/resources/test/cpython" \
   "autoflake --recursive --expand-star-imports --remove-all-unused-imports --remove-unused-variables --remove-duplicate-keys crates/ruff_linter/resources/test/cpython" \
   "pycodestyle crates/ruff_linter/resources/test/cpython" \

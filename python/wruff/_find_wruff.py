@@ -62,9 +62,9 @@ def find_ruff_bin() -> str:
     return find_wruff_bin()
 
 
-def _executable_names() -> tuple[str, str]:
+def _executable_names() -> tuple[str]:
     exe_suffix = sysconfig.get_config_var("EXE")
-    return (f"wruff{exe_suffix}", f"ruff{exe_suffix}")
+    return (f"wruff{exe_suffix}",)
 
 
 def _module_path() -> str | None:
