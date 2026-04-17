@@ -13,6 +13,37 @@
 
 An extremely fast Python linter and code formatter, written in Rust.
 
+## Wruff Fork
+
+This repository is developed as **Wruff**, a deliberate fork of Ruff with a different
+formatter opinion set. Wruff exists to keep Ruff's speed and general formatting approach while
+changing a few defaults and adding a small set of formatter controls that better match the style
+this fork is targeting.
+
+Wruff currently differs from upstream Ruff in these user-visible ways:
+
+- Default `line-length = 120`
+- Default `argument-indent = "double"` for multiline function-definition parameters
+- Default `slice-spacing = "permissive"`
+- Default `preserve-multiline = true`
+- Additional `hug-nested-calls` option for compact outer wrappers around multiline nested calls
+- Accepts `wruff.toml`, `.wruff.toml`, and `[tool.wruff]`, while still recognizing Ruff's config names
+
+If you want Wruff's formatter behavior explicitly in config, use:
+
+```toml
+[tool.wruff]
+line-length = 120
+
+[tool.wruff.format]
+argument-indent = "double"
+slice-spacing = "permissive"
+preserve-multiline = true
+```
+
+The rest of this README still largely describes upstream Ruff and its broader capabilities. Wruff
+inherits that foundation and then layers its fork-specific defaults and options on top.
+
 <p align="center">
   <picture align="center">
     <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/1309177/232603514-c95e9b0f-6b31-43de-9a80-9e844173fd6a.svg">
