@@ -50,24 +50,24 @@ use ruff_python_stdlib::identifiers::is_identifier;
 pub struct Options {
     /// A path to the cache directory.
     ///
-    /// By default, Ruff stores cache results in a `.ruff_cache` directory in
+    /// By default, Wruff stores cache results in a `.wruff_cache` directory in
     /// the current project root.
     ///
-    /// However, Ruff will also respect the `RUFF_CACHE_DIR` environment
-    /// variable, which takes precedence over that default.
+    /// However, Wruff will also respect the `WRUFF_CACHE_DIR` environment
+    /// variable, and the legacy `RUFF_CACHE_DIR` environment variable, both of
+    /// which take precedence over that default.
     ///
-    /// This setting will override even the `RUFF_CACHE_DIR` environment
-    /// variable, if set.
+    /// This setting will override both environment variables, if set.
     #[option(
-        default = r#"".ruff_cache""#,
+        default = r#"".wruff_cache""#,
         value_type = "str",
-        example = r#"cache-dir = "~/.cache/ruff""#
+        example = r#"cache-dir = "~/.cache/wruff""#
     )]
     pub cache_dir: Option<String>,
 
-    /// A path to a local `pyproject.toml` or `ruff.toml` file to merge into this
-    /// configuration. User home directory and environment variables will be
-    /// expanded.
+    /// A path to a local `pyproject.toml`, `wruff.toml`, or `ruff.toml` file
+    /// to merge into this configuration. User home directory and environment
+    /// variables will be expanded.
     ///
     /// To resolve the current configuration file, Ruff will first load
     /// this base configuration file, then merge in properties defined
@@ -185,7 +185,7 @@ pub struct Options {
     /// Note that you'll typically want to use
     /// [`extend-exclude`](#extend-exclude) to modify the excluded paths.
     #[option(
-        default = r#"[".bzr", ".direnv", ".eggs", ".git", ".git-rewrite", ".hg", ".mypy_cache", ".nox", ".pants.d", ".pytype", ".ruff_cache", ".svn", ".tox", ".venv", "__pypackages__", "_build", "buck-out", "dist", "node_modules", "venv"]"#,
+        default = r#"[".bzr", ".direnv", ".eggs", ".git", ".git-rewrite", ".hg", ".mypy_cache", ".nox", ".pants.d", ".pytype", ".wruff_cache", ".ruff_cache", ".svn", ".tox", ".venv", "__pypackages__", "_build", "buck-out", "dist", "node_modules", "venv"]"#,
         value_type = "list[str]",
         example = r#"
             exclude = [".venv"]
@@ -395,7 +395,7 @@ pub struct Options {
     ///
     /// When omitted, the `src` directory will typically default to including both:
     ///
-    /// 1. The directory containing the nearest `pyproject.toml`, `ruff.toml`, or `.ruff.toml` file (the "project root").
+    /// 1. The directory containing the nearest `pyproject.toml`, `wruff.toml`, `.wruff.toml`, `ruff.toml`, or `.ruff.toml` file (the "project root").
     /// 2. The `"src"` subdirectory of the project root.
     ///
     /// These defaults ensure that Ruff supports both flat layouts and `src` layouts out-of-the-box.
@@ -447,7 +447,7 @@ pub struct Options {
     ///
     /// See [`pycodestyle.max-line-length`](#lint_pycodestyle_max-line-length) to configure different lengths for `E501` and the formatter.
     #[option(
-        default = "88",
+        default = "120",
         value_type = "int",
         example = r#"
         # Allow lines to be as long as 120.
@@ -3796,17 +3796,7 @@ pub struct FormatOptions {
 
     /// Controls how Ruff indents multiline function parameters.
     ///
-    /// `argument-indent = "single"` (default):
-    ///
-    /// ```python
-    /// def function_name(
-    ///     first_argument,
-    ///     second_argument,
-    /// ):
-    ///     pass
-    /// ```
-    ///
-    /// `argument-indent = "double"`:
+    /// `argument-indent = "double"` (default):
     ///
     /// ```python
     /// def function_name(
@@ -3815,8 +3805,18 @@ pub struct FormatOptions {
     /// ):
     ///     pass
     /// ```
+    ///
+    /// `argument-indent = "single"`:
+    ///
+    /// ```python
+    /// def function_name(
+    ///     first_argument,
+    ///     second_argument,
+    /// ):
+    ///     pass
+    /// ```
     #[option(
-        default = r#""single""#,
+        default = r#""double""#,
         value_type = r#""single" | "double""#,
         example = r#"
             # Indent wrapped function parameters by two levels.
@@ -3911,9 +3911,9 @@ pub struct FormatOptions {
     /// Ruff's shared joiner, like call arguments, list elements, dict items, and import names,
     /// when the source already spans multiple lines.
     #[option(
-        default = r#"false"#,
+        default = r#"true"#,
         value_type = r#"bool"#,
-        example = "preserve-multiline = true"
+        example = "preserve-multiline = false"
     )]
     pub preserve_multiline: Option<bool>,
 
@@ -3935,16 +3935,16 @@ pub struct FormatOptions {
 
     /// Controls how aggressively Ruff inserts spaces around slice colons.
     ///
-    /// `slice-spacing = "pep8"` (default) follows Black-style spacing rules.
-    ///
-    /// `slice-spacing = "permissive"` keeps compact slice formatting for simple arithmetic
+    /// `slice-spacing = "permissive"` (default) keeps compact slice formatting for simple arithmetic
     /// and dotted attribute expressions like `args.n`, `a + 1`, and `i * 2`.
+    ///
+    /// `slice-spacing = "pep8"` follows Black-style spacing rules.
     #[option(
-        default = r#""pep8""#,
+        default = r#""permissive""#,
         value_type = r#""pep8" | "permissive""#,
         example = r#"
-            # Allow more compact spacing in simple arithmetic and dotted-name slices.
-            slice-spacing = "permissive"
+            # Use Black-style spacing for slice bounds.
+            slice-spacing = "pep8"
         "#
     )]
     pub slice_spacing: Option<SliceSpacing>,

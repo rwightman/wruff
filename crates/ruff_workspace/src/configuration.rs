@@ -60,7 +60,7 @@ use crate::pyproject;
 use crate::resolver::ConfigurationOrigin;
 use crate::settings::{
     EXCLUDE, FileResolverSettings, FormatterSettings, INCLUDE, INCLUDE_PREVIEW, LineEnding,
-    Settings,
+    Settings, wruff_default_line_length,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -165,6 +165,7 @@ impl Configuration {
         let linter_target_version = TargetVersion(self.target_version);
         let target_version = self.target_version.unwrap_or_default();
         let global_preview = self.preview.unwrap_or_default();
+        let line_length = self.line_length.unwrap_or_else(wruff_default_line_length);
 
         let format = self.format;
         let format_defaults = FormatterSettings::default();
@@ -186,11 +187,7 @@ impl Configuration {
             preview: format_preview,
             unresolved_target_version: target_version,
             per_file_target_version: per_file_target_version.clone(),
-            line_width: self
-                .line_length
-                .map_or(format_defaults.line_width, |length| {
-                    ruff_formatter::LineWidth::from(NonZeroU16::from(length))
-                }),
+            line_width: ruff_formatter::LineWidth::from(NonZeroU16::from(line_length)),
             line_ending: format.line_ending.unwrap_or(format_defaults.line_ending),
             indent_style: format.indent_style.unwrap_or(format_defaults.indent_style),
             argument_indent: format
@@ -249,8 +246,6 @@ impl Configuration {
 
         let lint = self.lint;
         let lint_preview = lint.preview.unwrap_or(global_preview);
-
-        let line_length = self.line_length.unwrap_or_default();
 
         let rules = lint.as_rule_table(lint_preview)?;
 

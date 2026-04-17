@@ -10,7 +10,7 @@ documentation = { workspace = true }
 repository = { workspace = true }
 license = { workspace = true }
 readme = "../../README.md"
-default-run = "ruff"
+default-run = "wruff"
 
 [package.metadata.cargo-shear]
 # Used via macro expansion.
@@ -96,3 +96,7 @@ workspace = true
 
 [lib]
 doctest = false
+
+[[bin]]
+name = "wruff"
+path = "src/bin/wruff.rs"

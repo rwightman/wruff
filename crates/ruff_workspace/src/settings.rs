@@ -3,6 +3,7 @@ use ruff_cache::cache_dir;
 use ruff_formatter::{FormatOptions, IndentStyle, IndentWidth, LineWidth};
 use ruff_graph::AnalyzeSettings;
 use ruff_linter::display_settings;
+use ruff_linter::line_width::LineLength;
 use ruff_linter::settings::LinterSettings;
 use ruff_linter::settings::types::{
     CompiledPerFileTargetVersionList, ExtensionMapping, FilePattern, FilePatternSet, OutputFormat,
@@ -16,7 +17,12 @@ use ruff_python_formatter::{
 };
 use ruff_source_file::find_newline;
 use std::fmt;
+use std::num::NonZeroU16;
 use std::path::{Path, PathBuf};
+
+pub(crate) fn wruff_default_line_length() -> LineLength {
+    LineLength::try_from(120).unwrap()
+}
 
 #[derive(Debug, CacheKey)]
 pub struct Settings {
@@ -42,6 +48,11 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         let project_root = path_dedot::CWD.as_path();
+        let line_length = wruff_default_line_length();
+        let mut linter = LinterSettings::new(project_root);
+        linter.line_length = line_length;
+        linter.pycodestyle.max_line_length = line_length;
+
         Self {
             cache_dir: cache_dir(project_root),
             fix: false,
@@ -49,7 +60,7 @@ impl Default for Settings {
             output_format: OutputFormat::default(),
             show_fixes: false,
             unsafe_fixes: UnsafeFixes::default(),
-            linter: LinterSettings::new(project_root),
+            linter,
             file_resolver: FileResolverSettings::new(project_root),
             formatter: FormatterSettings::default(),
             analyze: AnalyzeSettings::default(),
@@ -124,6 +135,7 @@ pub(crate) static EXCLUDE: &[FilePattern] = &[
     FilePattern::Builtin(".pyenv"),
     FilePattern::Builtin(".pytest_cache"),
     FilePattern::Builtin(".pytype"),
+    FilePattern::Builtin(".wruff_cache"),
     FilePattern::Builtin(".ruff_cache"),
     FilePattern::Builtin(".svn"),
     FilePattern::Builtin(".tox"),
@@ -274,16 +286,16 @@ impl Default for FormatterSettings {
             unresolved_target_version: default_options.target_version(),
             per_file_target_version: CompiledPerFileTargetVersionList::default(),
             preview: PreviewMode::Disabled,
-            line_width: default_options.line_width(),
+            line_width: LineWidth::from(NonZeroU16::from(wruff_default_line_length())),
             line_ending: LineEnding::Auto,
             indent_style: default_options.indent_style(),
-            argument_indent: default_options.argument_indent(),
-            preserve_multiline: default_options.preserve_multiline(),
+            argument_indent: ArgumentIndent::Double,
+            preserve_multiline: true,
             indent_width: default_options.indent_width(),
             quote_style: default_options.quote_style(),
             nested_string_quote_style: default_options.nested_string_quote_style(),
             magic_trailing_comma: default_options.magic_trailing_comma(),
-            slice_spacing: default_options.slice_spacing(),
+            slice_spacing: SliceSpacing::Permissive,
             docstring_code_format: default_options.docstring_code(),
             docstring_code_line_width: default_options.docstring_code_line_width(),
         }

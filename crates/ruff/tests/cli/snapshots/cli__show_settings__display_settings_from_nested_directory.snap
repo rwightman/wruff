@@ -14,7 +14,7 @@ Resolved settings for: "[TMP]/subdir/test.py"
 Settings path: "[TMP]/subdir/pyproject.toml"
 
 # General Settings
-cache_dir = "[TMP]/subdir/.ruff_cache"
+cache_dir = "[TMP]/subdir/.wruff_cache"
 fix = false
 fix_only = false
 output_format = full
@@ -36,6 +36,7 @@ file_resolver.exclude = [
 	".pyenv",
 	".pytest_cache",
 	".pytype",
+	".wruff_cache",
 	".ruff_cache",
 	".svn",
 	".tox",
@@ -395,10 +396,13 @@ formatter.preview = disabled
 formatter.line_width = 120
 formatter.line_ending = auto
 formatter.indent_style = space
+formatter.argument_indent = double
+formatter.preserve_multiline = true
 formatter.indent_width = 4
 formatter.quote_style = double
 formatter.nested_string_quote_style = alternating
 formatter.magic_trailing_comma = respect
+formatter.slice_spacing = permissive
 formatter.docstring_code_format = disabled
 formatter.docstring_code_line_width = dynamic
 

@@ -471,9 +471,7 @@ with open("a_really_long_foo") as foo, open("a_really_long_bar") as bar, open("a
         let result = expect_formatted(result);
 
         assert_snapshot!(result, @r#"
-        with open("a_really_long_foo") as foo, open("a_really_long_bar") as bar, open(
-            "a_really_long_baz"
-        ) as baz:
+        with open("a_really_long_foo") as foo, open("a_really_long_bar") as bar, open("a_really_long_baz") as baz:
             pass
         "#);
     }
@@ -544,9 +542,7 @@ sys.exit(
         .expect("Expected formatting changes");
 
         assert_snapshot!(result.as_code(), @r#"
-        with open("a_really_long_foo") as foo, open("a_really_long_bar") as bar, open(
-            "a_really_long_baz"
-        ) as baz:
+        with open("a_really_long_foo") as foo, open("a_really_long_bar") as bar, open("a_really_long_baz") as baz:
             pass
         "#);
 
