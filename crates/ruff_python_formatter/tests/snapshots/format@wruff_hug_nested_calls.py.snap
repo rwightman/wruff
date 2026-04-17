@@ -1,0 +1,130 @@
+---
+source: crates/ruff_python_formatter/tests/fixtures.rs
+input_file: crates/ruff_python_formatter/resources/test/fixtures/ruff/wruff_hug_nested_calls.py
+---
+## Input
+```python
+self.pre_logits = nn.Sequential(OrderedDict([
+    ("fc", nn.Linear(in_features, hidden_size, **dd)),
+    ("act", act_layer()),
+]))
+
+block_args.update(dict(
+    dw_kernel_size=_parse_ksize(options["k"]),
+    num_heads=int(options["h"]),
+    key_dim=kv_dim,
+    value_dim=kv_dim,
+    kv_stride=int(options.get("v", 1)),
+    noskip=skip is False,
+))
+
+convs.append(layers.conv_norm_act(
+    in_chs,
+    out_chs,
+    kernel_size=kernel_size,
+    stride=stride,
+    groups=groups,
+    apply_act=False,
+    **dd,
+))
+```
+
+## Outputs
+### Output 1
+```
+indent-style               = space
+line-width                 = 50
+indent-width               = 4
+quote-style                = Double
+line-ending                = LineFeed
+magic-trailing-comma       = Respect
+docstring-code             = Disabled
+docstring-code-line-width  = "dynamic"
+preview                    = Enabled
+target_version             = 3.10
+source_type                = Python
+nested-string-quote-style  = alternating
+```
+
+```python
+self.pre_logits = nn.Sequential(
+    OrderedDict([
+        (
+            "fc",
+            nn.Linear(
+                in_features, hidden_size, **dd
+            ),
+        ),
+        ("act", act_layer()),
+    ])
+)
+
+block_args.update(
+    dict(
+        dw_kernel_size=_parse_ksize(options["k"]),
+        num_heads=int(options["h"]),
+        key_dim=kv_dim,
+        value_dim=kv_dim,
+        kv_stride=int(options.get("v", 1)),
+        noskip=skip is False,
+    )
+)
+
+convs.append(
+    layers.conv_norm_act(
+        in_chs,
+        out_chs,
+        kernel_size=kernel_size,
+        stride=stride,
+        groups=groups,
+        apply_act=False,
+        **dd,
+    )
+)
+```
+
+
+### Output 2
+```
+indent-style               = space
+line-width                 = 50
+indent-width               = 4
+quote-style                = Double
+line-ending                = LineFeed
+magic-trailing-comma       = Respect
+docstring-code             = Disabled
+docstring-code-line-width  = "dynamic"
+preview                    = Enabled
+target_version             = 3.10
+source_type                = Python
+nested-string-quote-style  = alternating
+```
+
+```python
+self.pre_logits = nn.Sequential(OrderedDict([
+    (
+        "fc",
+        nn.Linear(in_features, hidden_size, **dd),
+    ),
+    ("act", act_layer()),
+]))
+
+block_args.update(dict(
+    dw_kernel_size=_parse_ksize(options["k"]),
+    num_heads=int(options["h"]),
+    key_dim=kv_dim,
+    value_dim=kv_dim,
+    kv_stride=int(options.get("v", 1)),
+    noskip=skip is False,
+))
+
+convs.append(layers.conv_norm_act(
+    in_chs,
+    out_chs,
+    kernel_size=kernel_size,
+    stride=stride,
+    groups=groups,
+    apply_act=False,
+    **dd,
+))
+```

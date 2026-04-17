@@ -77,6 +77,10 @@ pub struct PyFormatOptions {
     /// use the shared joiner.
     preserve_multiline: bool,
 
+    /// Keeps single nested call arguments on the outer call line when the nested call already
+    /// spans multiple lines.
+    hug_nested_calls: bool,
+
     /// Controls how aggressively Ruff inserts spaces around slice colons.
     slice_spacing: SliceSpacing,
 }
@@ -111,6 +115,7 @@ impl Default for PyFormatOptions {
             nested_string_quote_style: NestedStringQuoteStyle::default(),
             argument_indent: ArgumentIndent::default(),
             preserve_multiline: false,
+            hug_nested_calls: false,
             slice_spacing: SliceSpacing::default(),
         }
     }
@@ -175,6 +180,10 @@ impl PyFormatOptions {
 
     pub const fn preserve_multiline(&self) -> bool {
         self.preserve_multiline
+    }
+
+    pub const fn hug_nested_calls(&self) -> bool {
+        self.hug_nested_calls
     }
 
     pub const fn slice_spacing(&self) -> SliceSpacing {
@@ -259,6 +268,12 @@ impl PyFormatOptions {
     #[must_use]
     pub fn with_preserve_multiline(mut self, preserve_multiline: bool) -> Self {
         self.preserve_multiline = preserve_multiline;
+        self
+    }
+
+    #[must_use]
+    pub fn with_hug_nested_calls(mut self, hug_nested_calls: bool) -> Self {
+        self.hug_nested_calls = hug_nested_calls;
         self
     }
 

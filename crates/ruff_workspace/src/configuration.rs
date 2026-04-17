@@ -196,6 +196,9 @@ impl Configuration {
             preserve_multiline: format
                 .preserve_multiline
                 .unwrap_or(format_defaults.preserve_multiline),
+            hug_nested_calls: format
+                .hug_nested_calls
+                .unwrap_or(format_defaults.hug_nested_calls),
             indent_width: self
                 .indent_width
                 .map_or(format_defaults.indent_width, |tab_size| {
@@ -1260,6 +1263,7 @@ pub struct FormatConfiguration {
     pub indent_style: Option<IndentStyle>,
     pub argument_indent: Option<ArgumentIndent>,
     pub preserve_multiline: Option<bool>,
+    pub hug_nested_calls: Option<bool>,
     pub quote_style: Option<QuoteStyle>,
     pub nested_string_quote_style: Option<ruff_python_formatter::NestedStringQuoteStyle>,
     pub magic_trailing_comma: Option<MagicTrailingComma>,
@@ -1288,6 +1292,7 @@ impl FormatConfiguration {
             indent_style: options.indent_style,
             argument_indent: options.argument_indent,
             preserve_multiline: options.preserve_multiline,
+            hug_nested_calls: options.hug_nested_calls,
             quote_style: options.quote_style,
             nested_string_quote_style: options.nested_string_quote_style,
             magic_trailing_comma: options.skip_magic_trailing_comma.map(|skip| {
@@ -1319,6 +1324,7 @@ impl FormatConfiguration {
             indent_style: self.indent_style.or(config.indent_style),
             argument_indent: self.argument_indent.or(config.argument_indent),
             preserve_multiline: self.preserve_multiline.or(config.preserve_multiline),
+            hug_nested_calls: self.hug_nested_calls.or(config.hug_nested_calls),
             quote_style: self.quote_style.or(config.quote_style),
             nested_string_quote_style: self
                 .nested_string_quote_style
