@@ -56,7 +56,7 @@ ignore = ["F401"]
           "severity": 2,
           "code": "F401",
           "codeDescription": {
-            "href": "https://docs.astral.sh/ruff/rules/unused-import"
+            "href": "https://github.com/rwightman/wruff/rules/unused-import"
           },
           "source": "Ruff",
           "message": "`os` imported but unused",
