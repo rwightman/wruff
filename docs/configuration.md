@@ -573,15 +573,15 @@ Log levels:
                  detecting diagnostics)
 
 Global options:
-    --config <CONFIG_OPTION>
-        Either a path to a TOML configuration file (`pyproject.toml`,
-        `wruff.toml`, or `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such
-        as you might find in a `wruff.toml` configuration file) overriding a
-        specific configuration option (e.g., `--config "lint.line-length =
-        100"` or `--config "format.quote-style = 'single'"`). Overrides of
-        individual settings using this option always take precedence over all
-        configuration files, including configuration files that were also
-        specified using `--config`
+      --config <CONFIG_OPTION>
+          Either a path to a TOML configuration file (`pyproject.toml`,
+          `wruff.toml`, or `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such
+          as you might find in a `wruff.toml` configuration file) overriding a
+          specific configuration option (e.g., `--config "lint.line-length =
+          100"` or `--config "format.quote-style = 'single'"`). Overrides of
+          individual settings using this option always take precedence over all
+          configuration files, including configuration files that were also
+          specified using `--config`
       --isolated
           Ignore all configuration files
       --color <WHEN>
@@ -716,15 +716,15 @@ Log levels:
                  detecting diagnostics)
 
 Global options:
-    --config <CONFIG_OPTION>
-        Either a path to a TOML configuration file (`pyproject.toml`,
-        `wruff.toml`, or `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such
-        as you might find in a `wruff.toml` configuration file) overriding a
-        specific configuration option (e.g., `--config "lint.line-length =
-        100"` or `--config "format.quote-style = 'single'"`). Overrides of
-        individual settings using this option always take precedence over all
-        configuration files, including configuration files that were also
-        specified using `--config`
+      --config <CONFIG_OPTION>
+          Either a path to a TOML configuration file (`pyproject.toml`,
+          `wruff.toml`, or `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such
+          as you might find in a `wruff.toml` configuration file) overriding a
+          specific configuration option (e.g., `--config "lint.line-length =
+          100"` or `--config "format.quote-style = 'single'"`). Overrides of
+          individual settings using this option always take precedence over all
+          configuration files, including configuration files that were also
+          specified using `--config`
       --isolated
           Ignore all configuration files
       --color <WHEN>
@@ -813,15 +813,15 @@ Log levels:
                  detecting diagnostics)
 
 Global options:
-    --config <CONFIG_OPTION>
-        Either a path to a TOML configuration file (`pyproject.toml`,
-        `wruff.toml`, or `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such
-        as you might find in a `wruff.toml` configuration file) overriding a
-        specific configuration option (e.g., `--config "lint.line-length =
-        100"` or `--config "format.quote-style = 'single'"`). Overrides of
-        individual settings using this option always take precedence over all
-        configuration files, including configuration files that were also
-        specified using `--config`
+      --config <CONFIG_OPTION>
+          Either a path to a TOML configuration file (`pyproject.toml`,
+          `wruff.toml`, or `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such
+          as you might find in a `wruff.toml` configuration file) overriding a
+          specific configuration option (e.g., `--config "lint.line-length =
+          100"` or `--config "format.quote-style = 'single'"`). Overrides of
+          individual settings using this option always take precedence over all
+          configuration files, including configuration files that were also
+          specified using `--config`
       --isolated
           Ignore all configuration files
       --color <WHEN>
